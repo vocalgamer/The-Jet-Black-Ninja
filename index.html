@@ -28,7 +28,7 @@ canvas{display:block;touch-action:none}
    ・暗殺……気づかれていない敵／血遁から出てすぐの攻撃は、雑兵を一撃で倒す
    ・侍は正面の斬撃を弾く。ガードで隙を作るか、4撃目で崩すか、背後・血遁から
    ========================================================= */
-const VERSION='v0.61',VDATE='2026-11-13';
+const VERSION='v0.62',VDATE='2026-11-13';
 const W=450,H=800,TOP=62,TAU=Math.PI*2,PI=Math.PI;
 const JP='"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","MS PMincho",serif';
 const GO='"Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif';
@@ -542,11 +542,19 @@ function hurt(sx,sy,o){o=o||{};if(P.inv>0||P.dash||P.swim||P.dead||state!=='play
   return 'hit'}
 
 /* ---------- 自機 ---------- */
-const inp={kx:0,ky:0,tx:0,ty:0,px:0,py:0,stick:null,sx:0,sy:0,guardKey:false,guardMouse:false,guardTouch:null,padGuard:false,atkMouse:false};
+const inp={kx:0,ky:0,tx:0,ty:0,px:0,py:0,stick:null,sx:0,sy:0,guardKey:false,guardMouse:false,guardTouch:null,padGuard:false,atkMouse:false,go:false,gx:0,gy:0,gmT:0};
+/* 操作の切替：0＝従来（スティック＋ボタン） 1＝なぞり（速さに上限・速いと足音・はじくと一閃） 2＝なぞり・無制限（試験：指やカーソルにそのまま付いてくる） */
+let CTRL=LS.get('ctrl',0)|0;if(CTRL<0||CTRL>2)CTRL=0;
+const CTRL_N=['従来','なぞり','なぞり・無制限'],FOLLOW_K=1.5,FLICK_V=1100;
+function setCtrl(m){CTRL=((m%3)+3)%3;LS.set('ctrl',CTRL);resetTouch()}
+const stickIn=()=>inp.kx||inp.ky||inp.tx||inp.ty||inp.px||inp.py;
 const guarding=()=>inp.guardKey||inp.guardMouse||inp.guardTouch!=null||inp.padGuard;
 function initScarf(){P.scarf=[];for(let i=0;i<9;i++)P.scarf.push([P.x,P.y-29*UK+i*4])}
 function pressAttack(){if(state!=='play'||G.paused)return;P.atkBuf=.25;hintDone('atk')}
-function inputDir(){let ix=inp.kx+inp.tx+inp.px,iy=inp.ky+inp.ty+inp.py;const il=hyp(ix,iy);if(il>1){ix/=il;iy/=il}return[ix,iy,Math.min(1,il)]}
+function inputDir(){let ix=inp.kx+inp.tx+inp.px,iy=inp.ky+inp.ty+inp.py;const il=hyp(ix,iy);
+  if(CTRL&&inp.go&&il<.01){const dx=inp.gx-P.x,dy=inp.gy-P.y,d=hyp(dx,dy);if(d<4)return[0,0,0]; /* なぞり：目標点へ向かう。近いほどゆっくり、遠いほど速く（上限あり） */
+    const m=Math.min(CTRL===1?FOLLOW_K:1,d*12/MOVE_V);return[dx/d*m,dy/d*m,Math.min(1,m)]}
+  if(il>1){ix/=il;iy/=il}return[ix,iy,Math.min(1,il)]}
 function startAttack(ix,iy){
   const st=P.comboWin>0?P.stage:0,S=COMBO[st];
   if(hyp(ix,iy)>.3)P.face=Math.atan2(iy,ix);
@@ -755,6 +763,10 @@ function updPlayer(dt){
     if(!blocked(P.x+mx,P.y,P.r))P.x+=mx;else{P.vx=0;P.kx=0}
     if(!blocked(P.x,P.y+my,P.r))P.y+=my;else{P.vy=0;P.ky=0}
     if(!P.atk&&!P.guard&&il>.15)P.face=turn(P.face,Math.atan2(iy,ix),18*dt);
+    /* なぞり・無制限：目標点まで一気に動く（壁は細かい刻みで止める） */
+    if(CTRL===2&&inp.go&&!P.atk&&!P.guard&&P.stun<=0&&!stickIn()){const dx=inp.gx-P.x,dy=inp.gy-P.y,d=hyp(dx,dy);
+      if(d>3){const n=Math.min(120,Math.ceil(d/6)),sx=dx/n,sy=dy/n;for(let i=0;i<n;i++){if(!blocked(P.x+sx,P.y,P.r))P.x+=sx;if(!blocked(P.x,P.y+sy,P.r))P.y+=sy}P.vx=P.vy=0}
+      if(touchMode){const l=hyp(inp.gx-P.x,inp.gy-P.y);if(l>30){inp.gx=P.x+(inp.gx-P.x)/l*30;inp.gy=P.y+(inp.gy-P.y)/l*30}}}
   }
   const kf=Math.exp(-9*dt);P.kx*=kf;P.ky*=kf;
   const a=P.atk;
@@ -764,7 +776,11 @@ function updPlayer(dt){
     if(P.atk&&a.t>=a.S.dur){P.atk=null;P.comboWin=.45;if(a.st===3){P.recover=.08;P.comboWin=0;P.stage=0}if(a.queued)P.atkBuf=.1}}
   // 連撃は1回押すごとに1段ずつ（押しっぱなしでは続かない）
   if(!P.atk&&!P.guard&&!P.dash&&P.stun<=0&&P.recover<=0&&P.atkBuf>0)startAttack(ix,iy);
-  P.mv=hyp(P.x-ox,P.y-oy);if(P.mv>0){P.walkPh+=P.mv*.25;G.moved+=P.mv;if(G.moved>90)hintDone('move')}
+  P.mv=hyp(P.x-ox,P.y-oy);
+  /* なぞり：従来より速く動くと足音が立ち、近くの敵が調べに来る（ゆっくりなら無音） */
+  if(CTRL===1&&!P.dash&&!P.atk&&dt>0&&P.mv/dt>MOVE_V*1.1&&!inBlood(P.x,P.y)){P.stepT=(P.stepT||0)-dt;if(P.stepT<=0){P.stepT=.32;const sp=P.mv/dt;noiseAt(P.x,P.y,70+(sp-MOVE_V)*1.1,false);
+    FX.push({t:'ring',x:P.x,y:P.y,r:34+(sp-MOVE_V)*.35,life:.3,max:.3,c:'215,220,255'});hint('run')}}
+  if(P.mv>0){P.walkPh+=P.mv*.25;G.moved+=P.mv;if(G.moved>90)hintDone('move')}
   // 血遁：血だまりの中で、攻撃もガードもしていない間
   P.hidden=!P.dash&&!P.atk&&!P.guard&&inBlood(P.x,P.y);
   if(P.hidden)P.hidT=HID_GRACE;else P.hidT=Math.max(0,P.hidT-dt);
@@ -855,7 +871,15 @@ const HINTS={
   keg:['火薬樽：斬る・手裏剣で導火線に火　爆発は敵も自分も巻き込む','火薬樽：斬る・手裏剣で導火線に火　爆発は敵も自分も巻き込む',8],
   sand:['砂撒きは血だまりを砂で消す　先に倒せ','砂撒きは血だまりを砂で消す　先に倒せ',7],
   gun:['鉄砲は防げない　狙いの線から外れるか、血に潜れ','鉄砲は防げない　狙いの線から外れるか、血に潜れ',8],
-  cap:['鎖につながれた人は、斬れば解放できる（体力と奥義が戻る）','鎖につながれた人は、斬れば解放できる（体力と奥義が戻る）',8]};
+  cap:['鎖につながれた人は、斬れば解放できる（体力と奥義が戻る）','鎖につながれた人は、斬れば解放できる（体力と奥義が戻る）',8],
+  run:['すばやく動くと足音が立つ　ゆっくり動けば気づかれない','すばやく動くと足音が立つ　ゆっくり動けば気づかれない',8]};
+/* なぞり操作の時だけ差し替えるヒント */
+const HINTS_F={move:['画面をなぞる：なぞった分だけ動く','マウスを動かす：カーソルへ移動'],atk:['タップ：斬る（連打で4連撃）','左クリック：斬る（連打で4連撃）'],
+  guard:['長押し：正面をガード　防ぐと敵に隙ができる','右クリック長押し：正面をガード　防ぐと隙ができる'],
+  dash:['すばやくはじく／【一閃】ボタン：無敵の突進斬り','右クリックを短く：【一閃】無敵の突進斬り'],
+  swim:['血の中ではじく／【一閃】→【血渡り】 つながった血を渡る','血の中で右クリックを短く →【血渡り】 つながった血を渡る']};
+const noFlick=s=>CTRL===2?s.replace('すばやくはじく／','').replace('血の中ではじく／','血の中で'):s; // はじいて一閃は「なぞり」だけ
+const hintTxt=k=>noFlick((CTRL&&HINTS_F[k]?HINTS_F[k]:HINTS[k])[touchMode?0:1]);
 const HINT_LATER=['cloud','tide','slip','lure','sea']; // 壱では出さない（弐から）。血の道は、血渡りを覚えてから
 function hint(k){if((stageI===0&&HINT_LATER.includes(k))||(k==='trail'&&!G.seen.swim))return;if(G.seen[k]||G.hq.includes(k)||(G.hint&&G.hint.k===k))return;G.hq.push(k)}
 function hintDone(k){if(!G.seen[k]){G.seen[k]=1;LS.set('hints2',G.seen)}const i=G.hq.indexOf(k);if(i>=0)G.hq.splice(i,1);if(G.hint&&G.hint.k===k&&G.hint.out===undefined)G.hint.out=.35}
@@ -867,7 +891,7 @@ function startStage(i){
   stageI=i;const S=STAGES[i];WALLS=S.walls.map(([x,y,w,h])=>({x,y,w,h}));
   E=[];ARR=[];SH=[];POOLS=[];PCS=[];FX=[];TXT=[];TRAIL=[];resetTouch();
   Object.assign(P,{x:S.start[0],y:S.start[1],hp:P.maxhp,face:-PI/2,vx:0,vy:0,kx:0,ky:0,lt:0,atk:null,atkBuf:0,stage:0,comboWin:0,recover:0,guard:false,gT:0,guardFx:0,
-    dash:null,dashCD:0,shuriCD:0,inv:0,stun:0,hidden:false,wasHidden:false,hidT:0,regenT:0,dead:false,sheath:0,swim:null,lit:false,drip:0,dripD:0,lastThin:null});initScarf();
+    dash:null,dashCD:0,shuriCD:0,inv:0,stun:0,hidden:false,wasHidden:false,hidT:0,regenT:0,dead:false,sheath:0,swim:null,lit:false,drip:0,dripD:0,lastThin:null,stepT:0});initScarf();
   Object.assign(G,{wave:0,waveT:0,kills:0,assn:0,hits:0,guards:0,chain:0,chainT:0,maxChain:0,time:0,slowT:0,stop:0,ts:1,shake:0,flash:0,boss:null,banner:null,big:null,ougi:null,moved:0,
     hq:[],hint:null,purge:-1,ending:false,introT:0,clearT:0,deadT:0,paused:false,ambT:0,pend:[],pendT:0,sheathT:0,cut:null,cutCd:0,fgT:0,swims:0,spears:0,swimNet:null,swimPick:null,
     fires:(S.fires||[]).map(([x,y])=>({x,y,on:true})),kegs:(S.kegs||[]).map(([x,y])=>({x,y,fuse:-1,dead:false})),
@@ -955,11 +979,15 @@ const UIB={dash:{x:W-50,y:H-174,r:29},shuri:{x:W-50,y:H-104,r:29}};
 const inC=(x,y,c,m=8)=>hyp(x-c.x,y-c.y)<c.r+m;
 const keys=new Set();
 const K_ATK=['j','z',' '],K_GUARD=['u','v'],K_OUGI=['l','e'],K_SHURI=['i','k'];
-function resetTouch(){TOUCH.clear();inp.stick=null;inp.tx=inp.ty=0;inp.guardTouch=null;inp.guardMouse=false;inp.atkMouse=false}
+function resetTouch(){TOUCH.clear();inp.stick=null;inp.tx=inp.ty=0;inp.guardTouch=null;inp.guardMouse=false;inp.atkMouse=false;inp.go=false}
 function toLog(ev){const r=cv.getBoundingClientRect();return[(ev.clientX-r.left)/r.width*W,(ev.clientY-r.top)/r.height*H]}
 function ensureMusic(){if(!MUS.theme&&AC&&state!=='over')musicStart(state!=='title'&&STAGES[stageI].boss&&!G.ending?'boss':'field')}
 function pauseGame(){if(state==='play'&&!P.dead&&!G.paused){G.paused=true;resetTouch()}}
-function mouseBtn(ev){const a=!!(ev.buttons&1),gd=!!(ev.buttons&2);if(a&&!inp.atkMouse)pressAttack();inp.atkMouse=a;inp.guardMouse=gd}
+function mouseGoal(ev){if(!CTRL)return;const[x,y]=toLog(ev);inp.gx=clamp(x,P.r,W-P.r);inp.gy=clamp(y,TOP+P.r,H-P.r);inp.go=true}
+/* なぞり：右クリックを短く押して離すと一閃（血の中では血渡り）。押し続ければ従来どおりガード */
+function mouseGuard(gd){const now=performance.now();if(gd&&!inp.guardMouse)inp.gmT=now;if(!gd&&inp.guardMouse&&CTRL&&now-inp.gmT<200&&state==='play'&&!G.paused)useDash();inp.guardMouse=gd}
+function mouseBtn(ev){const a=!!(ev.buttons&1),gd=!!(ev.buttons&2);mouseGoal(ev);
+  if(a&&!inp.atkMouse){if(CTRL&&!P.atk){const dx=inp.gx-P.x,dy=inp.gy-P.y;if(hyp(dx,dy)>8)P.face=Math.atan2(dy,dx)}pressAttack()}inp.atkMouse=a;mouseGuard(gd)}
 cv.addEventListener('pointerdown',ev=>{ev.preventDefault();initAudio();ensureMusic();
   const[x,y]=toLog(ev),touch=ev.pointerType==='touch'||ev.pointerType==='pen';touchMode=touch;
   if(state!=='play'||G.paused){uiTap(x,y);return}
@@ -971,6 +999,10 @@ cv.addEventListener('pointerdown',ev=>{ev.preventDefault();initAudio();ensureMus
   if(inC(x,y,UIB.shuri)){throwShuriken();return}
   // 奥義が溜まっている時に光る忍を触ったら、離した時に奥義（滑らせたら移動に切り替え）
   if(G.soul>=100&&!P.dead&&hyp(x-P.x,y-P.y)<44){TOUCH.set(id,{x,y,sx:x,sy:y,t:now,mode:'ougi',left:x<W/2});return}
+  if(CTRL){ /* なぞり：最初の指は「なぞって移動／タップで斬る／長押しでガード」。移動中の2本目の指は、押した瞬間に斬る */
+    if(inp.stick!=null&&TOUCH.has(inp.stick)){pressAttack();TOUCH.set(id,{x,y,sx:x,sy:y,t:now,mode:'act'})}
+    else TOUCH.set(id,{x,y,sx:x,sy:y,lx:x,ly:y,t:now,mode:'pend',hist:[]});
+    return}
   if(x<W/2){ // 左半分：触れた場所を中心にした見えないスティック
     if(inp.stick!=null)TOUCH.delete(inp.stick);
     inp.stick=id;inp.sx=x;inp.sy=y;inp.tx=inp.ty=0;TOUCH.set(id,{x,y,t:now,mode:'stick'})
@@ -980,23 +1012,31 @@ cv.addEventListener('pointerdown',ev=>{ev.preventDefault();initAudio();ensureMus
 function checkTouchHold(){const now=performance.now();
   if(inp.stick!=null&&!TOUCH.has(inp.stick)){inp.stick=null;inp.tx=inp.ty=0}
   if(inp.guardTouch!=null&&!TOUCH.has(inp.guardTouch))inp.guardTouch=null;
-  for(const [id,t] of TOUCH)if(t.mode==='act'&&now-t.t>TOUCH_HOLD&&inp.guardTouch==null){t.mode='guard';inp.guardTouch=id}}
+  for(const [id,t] of TOUCH)if((t.mode==='act'||t.mode==='pend')&&now-t.t>TOUCH_HOLD&&inp.guardTouch==null){t.mode='guard';inp.guardTouch=id}}
 cv.addEventListener('pointermove',ev=>{
   if(ev.pointerType==='mouse'){if(state==='play'&&!G.paused)mouseBtn(ev);return}
   const t=TOUCH.get(ev.pointerId);if(!t)return;const[x,y]=toLog(ev);t.x=x;t.y=y;
-  if(t.mode==='ougi'&&hyp(x-t.sx,y-t.sy)>14){if(t.left&&inp.stick==null){t.mode='stick';inp.stick=ev.pointerId;inp.sx=t.sx;inp.sy=t.sy;inp.tx=inp.ty=0}else t.mode='none'}
+  if(CTRL&&(t.mode==='pend'||(t.mode==='ougi'&&hyp(x-t.sx,y-t.sy)>14))&&hyp(x-t.sx,y-t.sy)>10&&inp.stick==null){t.mode='drag';t.lx=t.sx;t.ly=t.sy;t.hist=[];inp.stick=ev.pointerId;inp.gx=P.x;inp.gy=P.y;inp.go=true}
+  if(t.mode==='drag'){const R=CTRL===1?140:2000;inp.gx=clamp(inp.gx+x-t.lx,P.r,W-P.r);inp.gy=clamp(inp.gy+y-t.ly,TOP+P.r,H-P.r);t.lx=x;t.ly=y;
+    const l=hyp(inp.gx-P.x,inp.gy-P.y);if(l>R){inp.gx=P.x+(inp.gx-P.x)/l*R;inp.gy=P.y+(inp.gy-P.y)/l*R}
+    const now=performance.now();t.hist.push([x,y,now]);while(t.hist.length>1&&now-t.hist[0][2]>90)t.hist.shift();return}
+  if(!CTRL&&t.mode==='ougi'&&hyp(x-t.sx,y-t.sy)>14){if(t.left&&inp.stick==null){t.mode='stick';inp.stick=ev.pointerId;inp.sx=t.sx;inp.sy=t.sy;inp.tx=inp.ty=0}else t.mode='none'}
   if(t.mode==='stick'){let dx=x-inp.sx,dy=y-inp.sy,l=hyp(dx,dy);const R=STICK_R;
     if(l>R){inp.sx+=dx/l*(l-R);inp.sy+=dy/l*(l-R);inp.sx=clamp(inp.sx,R,W-R);inp.sy=clamp(inp.sy,TOP+R,H-R);dx=x-inp.sx;dy=y-inp.sy;l=hyp(dx,dy)}
     const m=l<6?0:Math.min(1,(l-4)/(R-10));inp.tx=l?dx/l*m:0;inp.ty=l?dy/l*m:0}});
 function pUp(ev){const tt=TOUCH.get(ev.pointerId);
   if(tt&&tt.mode==='ougi'&&ev.type==='pointerup')useOugi();
+  if(tt&&tt.mode==='pend'&&ev.type==='pointerup')pressAttack(); // なぞり：動かさずに離したら斬る
+  if(tt&&tt.mode==='drag'){inp.go=false; /* なぞり：すばやくはじいて離すと一閃（血の中では血渡り） */
+    if(CTRL===1&&ev.type==='pointerup'&&tt.hist.length>1){const h0=tt.hist[0],h1=tt.hist[tt.hist.length-1],dx=h1[0]-h0[0],dy=h1[1]-h0[1],d=hyp(dx,dy),ms=h1[2]-h0[2];
+      if(d>28&&ms>0&&d/ms*1000>FLICK_V){P.face=Math.atan2(dy,dx);useDash()}}}
   if(tt)TOUCH.delete(ev.pointerId);
   if(ev.pointerId===inp.stick){inp.stick=null;inp.tx=inp.ty=0}
   if(ev.pointerId===inp.guardTouch)inp.guardTouch=null;
-  if(ev.pointerType==='mouse'){if(ev.type==='pointercancel'){inp.atkMouse=inp.guardMouse=false}else{inp.atkMouse=!!(ev.buttons&1);inp.guardMouse=!!(ev.buttons&2)}}}
+  if(ev.pointerType==='mouse'){if(ev.type==='pointercancel'){inp.atkMouse=inp.guardMouse=false}else{inp.atkMouse=!!(ev.buttons&1);mouseGuard(!!(ev.buttons&2))}}}
 addEventListener('pointerup',pUp);addEventListener('pointercancel',pUp);
 cv.addEventListener('contextmenu',ev=>ev.preventDefault());
-function updKeys(){inp.guardKey=K_GUARD.some(k=>keys.has(k));
+function updKeys(){if(!touchMode)inp.go=false;inp.guardKey=K_GUARD.some(k=>keys.has(k));
   inp.kx=((keys.has('d')||keys.has('arrowright'))?1:0)-((keys.has('a')||keys.has('arrowleft'))?1:0);
   inp.ky=((keys.has('s')||keys.has('arrowdown'))?1:0)-((keys.has('w')||keys.has('arrowup'))?1:0)}
 function goAction(){
@@ -1011,6 +1051,7 @@ addEventListener('keydown',ev=>{const k=ev.key.toLowerCase();
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))ev.preventDefault();
   if(ev.repeat)return;keys.add(k);touchMode=false;initAudio();ensureMusic();updKeys();
   if(k==='m'){setMute(!muted);return}
+  if(k==='c'&&(state==='title'||G.paused)){SFX.ui();setCtrl(CTRL+1);return}
   if(state!=='play'||G.paused){if(k==='enter'||K_ATK.includes(k)||(G.paused&&(k==='p'||k==='escape'))){SFX.ui();goAction()}else if(k==='escape'&&(state==='over'||state==='clear'))toTitle();return}
   if(k==='p'||k==='escape'){pauseGame();return}
   if(k==='shift')useDash();
@@ -1511,7 +1552,7 @@ function drawHUD(){const gr=g.createLinearGradient(0,0,0,TOP);gr.addColorStop(0,
   if(G.chain>=2&&state==='play'){const pop=1+Math.max(0,G.chainT-2.8)*2;txt(G.chain+' 連斬',W-14,TOP+(b&&!b.dead?52:22),(17+Math.min(8,G.chain))*pop,G.chain>=8?'#ffd34a':G.chain>=4?'#ff6a7a':'#fff','right',JP,['#000',4],900)}}
 // タッチ操作の目印：スティック・攻撃の波紋・ガードの輪・右下のボタン
 function drawTouchUI(){if(!touchMode||state!=='play'||G.paused)return;g.save();
-  if(inp.stick!=null){g.globalAlpha=.35;g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.arc(inp.sx,inp.sy,STICK_R,0,TAU);g.stroke();g.globalAlpha=.5;g.fillStyle='rgba(255,255,255,.7)';ell(g,inp.sx+inp.tx*STICK_R,inp.sy+inp.ty*STICK_R,12,12)}
+  if(inp.stick!=null&&!CTRL){g.globalAlpha=.35;g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.arc(inp.sx,inp.sy,STICK_R,0,TAU);g.stroke();g.globalAlpha=.5;g.fillStyle='rgba(255,255,255,.7)';ell(g,inp.sx+inp.tx*STICK_R,inp.sy+inp.ty*STICK_R,12,12)}
   const now=performance.now();
   for(const t of TOUCH.values()){
     if(t.mode==='act'){const k=clamp((now-t.t)/180,0,1);if(k<1){g.globalAlpha=.55*(1-k);g.strokeStyle='#ff4060';g.lineWidth=2;g.beginPath();g.arc(t.x,t.y,12+k*18,0,TAU);g.stroke()}}
@@ -1519,10 +1560,11 @@ function drawTouchUI(){if(!touchMode||state!=='play'||G.paused)return;g.save();
   g.globalAlpha=1;g.restore();
   skillIcon(UIB.dash.x,UIB.dash.y,UIB.dash.r,G.swimPick?'血渡り':'一閃',P.dashCD,DASH_CD,G.swimPick?'#ff3050':'#75dcff',G.swimPick?12:14);skillIcon(UIB.shuri.x,UIB.shuri.y,UIB.shuri.r,'手裏剣',P.shuriCD,SHURI_CD,'#ff6685',12);
   // 壱ノ段の最初の数秒だけ、左右の役割を薄く表示
-  if(stageI===0&&G.time<7){const a=.5*clamp((7-G.time)/1.5,0,1);g.save();g.globalAlpha=a;g.strokeStyle='#fff';g.lineWidth=1;g.setLineDash([6,8]);g.beginPath();g.moveTo(W/2,TOP+40);g.lineTo(W/2,H-70);g.stroke();g.setLineDash([]);
+  if(CTRL&&stageI===0&&G.time<7){const a=.5*clamp((7-G.time)/1.5,0,1);g.save();g.globalAlpha=a;txt('なぞって移動',W/2,420,20,'#fff','center',JP,['#000',4],900);txt('タップで斬る／長押しで防御',W/2,448,12,'#ddd','center',JP,['#000',3]);g.restore()}
+  else if(stageI===0&&G.time<7){const a=.5*clamp((7-G.time)/1.5,0,1);g.save();g.globalAlpha=a;g.strokeStyle='#fff';g.lineWidth=1;g.setLineDash([6,8]);g.beginPath();g.moveTo(W/2,TOP+40);g.lineTo(W/2,H-70);g.stroke();g.setLineDash([]);
     txt('移 動',W/4,430,20,'#fff','center',JP,['#000',4],900);txt('ドラッグ',W/4,456,12,'#ddd','center',JP,['#000',3]);
     txt('斬 る',W*3/4,430,20,'#fff','center',JP,['#000',4],900);txt('タップ／長押しで防御',W*3/4,456,12,'#ddd','center',JP,['#000',3]);g.restore()}}
-function drawHint(){const h=G.hint;if(!h)return;let a=Math.min(1,h.t*4);if(h.out!==undefined)a=Math.max(0,h.out/.35);g.globalAlpha=a;const s=HINTS[h.k][touchMode?0:1];
+function drawHint(){const h=G.hint;if(!h)return;let a=Math.min(1,h.t*4);if(h.out!==undefined)a=Math.max(0,h.out/.35);g.globalAlpha=a;const s=hintTxt(h.k);
   g.font=`700 13px ${JP}`;const w=Math.min(436,g.measureText(s).width+28);rrect((W-w)/2,754,w,32,16);g.fillStyle='rgba(10,4,8,.88)';g.fill();g.strokeStyle='rgba(220,40,60,.8)';g.lineWidth=1.4;g.stroke();
   txt(s,W/2,771,13,'#fff','center',JP,null,700);g.globalAlpha=1}
 function drawBanner(){const b=G.banner;if(!b)return;const a=Math.min(1,b.t*5,(b.dur-b.t)*3);g.globalAlpha=Math.max(0,a);g.fillStyle='rgba(0,0,0,.55)';g.fillRect(0,300,W,110);
@@ -1544,11 +1586,13 @@ function drawOver(){const a=Math.min(1,G.overT*2);g.globalAlpha=a*.8;g.fillStyle
   if(G.overT>.6){button('この段からやり直す',95,450,260,54,()=>startStage(stageI));button('タイトルへ',125,525,200,46,toTitle,{bg:'rgba(40,30,40,.9)',size:16})}g.globalAlpha=1}
 const HELP_T=['左半分をドラッグ：移動','右半分をタップ：斬る（連打で4連撃）','右半分を長押し：正面をガード','右下【一閃】：無敵の突進斬り','右下【手裏剣】：敵を止める・音で気を引く','光る忍をタップ：奥義・影縫い','血の中で【一閃】：血渡り（血の上の敵を真下から串刺し）'];
 const HELP_K=['WASD／矢印：移動','J／Z／Space／左クリック：斬る（連打で4連撃）','U／V／右クリック長押し：正面をガード','Shift：一閃（無敵の突進斬り）','I／K：手裏剣（敵を止める・音で気を引く）','L／E：奥義・影縫い　　P／Esc：一時停止','血の中で Shift：血渡り（血の上の敵を真下から串刺し）'];
+const HELP_FT=['画面をなぞる：移動（なぞる速さで動く）','タップ：斬る（連打で4連撃）　長押し：正面をガード','移動中に2本目の指でタップ：動きながら斬る','すばやくはじく／右下【一閃】：無敵の突進斬り','右下【手裏剣】：敵を止める・音で気を引く','光る忍をタップ：奥義・影縫い','血の中ではじく／【一閃】：血渡り'];
+const HELP_FK=['マウスを動かす：カーソルへ移動','左クリック：斬る（連打で4連撃）','右クリック長押し：正面をガード','右クリックを短く：一閃／血の中では血渡り','I／K：手裏剣　　L／E：奥義・影縫い','P／Esc：一時停止　　C：操作の切替','WASD・Shift などのキー操作も、そのまま使える'];
 function drawPause(){g.fillStyle='rgba(5,2,6,.86)';g.fillRect(0,0,W,H);txt('一時停止',W/2,170,34,'#fff','center',JP,['#000',5],900);
   button('再開',125,220,200,54,()=>{G.paused=false});button('この段をやり直す',105,292,240,46,()=>startStage(stageI),{bg:'rgba(40,30,40,.9)',size:16});button('タイトルへ',125,352,200,44,toTitle,{bg:'rgba(40,30,40,.9)',size:16});
-  txt('— 操 作 —',W/2,440,14,'#e8b3c0','center',JP,null,900);const HL=touchMode?HELP_T:HELP_K;HL.forEach((l,i)=>txt(l,W/2,466+i*22,13,'#d6d0d4','center',JP,null,700));const py=466+HL.length*22+6;
+  button('操作：'+CTRL_N[CTRL]+'　（切替）',95,410,260,36,()=>setCtrl(CTRL+1),{bg:'rgba(40,30,40,.9)',size:14});const HL=CTRL?(touchMode?HELP_FT.map(noFlick):HELP_FK):(touchMode?HELP_T:HELP_K);HL.forEach((l,i)=>txt(l,W/2,466+i*22,13,'#d6d0d4','center',JP,null,700));const py=466+HL.length*22+6;
   txt('血だまりの中は【血遁】 敵から見えず、体力も戻る',W/2,py,12,'#ff9aa5','center',JP,null,700);txt('気づかれる前・血遁から出てすぐの攻撃は【暗殺】',W/2,py+20,12,'#ff9aa5','center',JP,null,700);txt('提灯・篝火の明かりの中では、血遁でも見つかる',W/2,py+40,12,'#ffc080','center',JP,null,700);
-  txt('斬った後に歩くと血の道【血引き】／血の中で奥義は【血海】',W/2,py+60,12,'#ff9aa5','center',JP,null,700);
+  txt(CTRL===1?'なぞり：すばやく動くと足音で気づかれる':CTRL===2?'なぞり・無制限（試験）：速さに上限も足音もない':'斬った後に歩くと血の道【血引き】／血の中で奥義は【血海】',W/2,py+60,12,CTRL?'#b8c8ff':'#ff9aa5','center',JP,null,700);
   muteIcon(W/2,720)}
 function drawEnding(){const t=G.endT;
   const R=G.capRes||{n:0,freed:0,amina:true,nj:true},all=R.freed>=R.n; // 解放できた人数で、結末の文が変わる
@@ -1608,7 +1652,7 @@ let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const rdt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{pollPad();update(rdt);draw()}catch(err){ERRN++;console.error(err)}}
 window.__SOB={get state(){return state},set state(v){state=v},G,P,inp,get E(){return E},get POOLS(){return POOLS},get BTNS(){return BTNS},get ARR(){return ARR},get SH(){return SH},get ERRN(){return ERRN},
   get touchMode(){return touchMode},set touchMode(v){touchMode=v},TOUCH,UIB,
-  startStage,update,draw,pressAttack,useDash,throwShuriken,useOugi,beginPlay,uiTap,STAGES,canSee,stageClear,toTitle,hurt,nextFromClear,blocked,los,checkTouchHold,mkEnemy,goAction,addPool,litBy,startStory,freeCap,lightKeg,explode,footBlood,kill,hint};
+  startStage,update,draw,pressAttack,useDash,throwShuriken,useOugi,beginPlay,uiTap,STAGES,canSee,stageClear,toTitle,hurt,nextFromClear,blocked,los,checkTouchHold,mkEnemy,goAction,addPool,litBy,startStory,freeCap,lightKeg,explode,footBlood,kill,hint,setCtrl,get CTRL(){return CTRL},noiseAt};
 requestAnimationFrame(loop);
 })();
 </script>
