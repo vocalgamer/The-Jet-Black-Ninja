@@ -28,7 +28,7 @@ canvas{display:block;touch-action:none}
    ・暗殺……気づかれていない敵／血遁から出てすぐの攻撃は、雑兵を一撃で倒す
    ・侍は正面の斬撃を弾く。ガードで隙を作るか、4撃目で崩すか、背後・血遁から
    ========================================================= */
-const VERSION='v0.63',VDATE='2026-11-14';
+const VERSION='v0.64',VDATE='2026-11-16';
 const W=450,H=800,TOP=62,TAU=Math.PI*2,PI=Math.PI;
 const JP='"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","MS PMincho",serif';
 const GO='"Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif';
@@ -267,6 +267,7 @@ function drawPools(){if(!POOLS.length)return;
   g.save();drawTrail('#5a0710',0,0);g.translate(-1,-1.6);drawTrail('rgba(255,130,140,.16)',0,1);g.restore();
   g.beginPath();for(const p of POOLS)if(p.r>1&&!p.thin)poolPath(g,p,1);g.fillStyle='#5a0710';g.fill();
   g.save();g.clip();
+  g.globalCompositeOperation='lighter';for(const p of POOLS){if(p.sea||p.thin||p.r<10||p.y<cam-90||p.y>cam+H+90)continue;const R=p.r*1.2;g.globalAlpha=.3+.06*Math.sin(G.t*1.3+p.rot*3);g.drawImage(GLOW_RED,p.x-R,p.y-R*.85,R*2,R*1.7)}g.globalAlpha=1;g.globalCompositeOperation='source-over'; // 血の芯が明るく光る
   let sea=false;
   for(const p of POOLS){if(p.sea){sea=true;continue}if(p.r<8||p.thin)continue;const w=Math.sin(G.t*1.3+p.rot*3)*.5+.5;
     g.fillStyle=`rgba(255,110,120,${.05+.04*w})`;ell(g,p.x-p.r*.25,p.y-p.r*.3,p.r*.5,p.r*.16,-.3);
@@ -1127,8 +1128,26 @@ function uiTap(x,y){if(btnTap(x,y))return;if(G.paused||state==='title'||state===
 function wallH(w,th){if(th==='beach')return w.w>=90?38:24;if(th==='port')return w.w>=200?70:w.w<=26?110:40;if(th==='village')return 32;if(th==='bamboo')return 66;if(th==='castle')return w.w<=26?36:w.h>40?50:30;return 90}
 /* 赤の独占：床と建物の色味を抜いて、墨と藍に寄せる。赤く見えるのは血だけになる */
 function inkGrade(cvs){const x=cvs.getContext('2d'),im=x.getImageData(0,0,cvs.width,cvs.height),d=im.data; /* 1点ずつ：彩度を約2割に落とし、わずかに藍へ寄せる（透明度はそのまま） */
-  for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;const r=d[i],gg=d[i+1],b=d[i+2],l=.3*r+.59*gg+.11*b;d[i]=(l+(r-l)*.22)*.93;d[i+1]=(l+(gg-l)*.22)*.98;d[i+2]=Math.min(255,(l+(b-l)*.22)*1.16+2)}
+  for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;const r=d[i],gg=d[i+1],b=d[i+2],l=.3*r+.59*gg+.11*b;const q=(Math.max(0,(l-38)*1.34+38)+7)/Math.max(1,l); /* 明暗の差を広げ、全体を少し持ち上げる。影は黒ではなく藍に */d[i]=Math.min(255,(l+(r-l)*.3)*.84*q);d[i+1]=Math.min(255,(l+(gg-l)*.3)*.97*q);d[i+2]=Math.min(255,(l+(b-l)*.3)*1.36*q+6)}
   x.putImageData(im,0,0)}
+/* 立体感：上面は月の側（左上）から明るく、南の壁は地面に近いほど暗く。上面と壁の境目に面取りの光、左と奥の縁に月の縁取り */
+function volShade(w){const A=w.art,c=A.cv.getContext('2d'),p=w.x-A.ox,q=w.y-w.H-A.oy,ww=w.w,hh=w.h,Hh=w.H;c.save();c.setTransform(BS,0,0,BS,0,0);c.globalCompositeOperation='source-atop';
+  let gr=c.createLinearGradient(p,q,p+ww,q+hh);gr.addColorStop(0,'rgba(196,212,255,.26)');gr.addColorStop(.5,'rgba(120,140,200,.04)');gr.addColorStop(1,'rgba(0,0,12,.30)');c.fillStyle=gr;c.fillRect(p-2,q-2,ww+4,hh+2);
+  gr=c.createLinearGradient(0,q+hh,0,q+hh+Hh);gr.addColorStop(0,'rgba(0,0,10,.10)');gr.addColorStop(.6,'rgba(0,0,10,.42)');gr.addColorStop(1,'rgba(0,0,8,.72)');c.fillStyle=gr;c.fillRect(p-2,q+hh,ww+4,Hh+4);
+  gr=c.createLinearGradient(p,0,p+ww,0);gr.addColorStop(0,'rgba(150,175,240,.14)');gr.addColorStop(.35,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,10,.26)');c.fillStyle=gr;c.fillRect(p-2,q+hh,ww+4,Hh+4);
+  c.fillStyle='rgba(222,232,255,.34)';c.fillRect(p,q+hh-.8,ww,1.6);c.fillStyle='rgba(214,226,255,.40)';c.fillRect(p,q,ww,1.3);c.fillRect(p,q,1.3,hh);
+  c.fillStyle='rgba(0,0,10,.34)';c.fillRect(p+ww-1.6,q,1.6,hh);c.restore()}
+/* 光のにじみ用の絵（中心が明るく、外へ消える円）。火は金、血は赤 */
+const mkGlow=(r,gg,b)=>{const c=mkCv(128,128),x=c.getContext('2d'),gr=x.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,`rgba(${r},${gg},${b},1)`);gr.addColorStop(.3,`rgba(${r},${gg},${b},.5)`);gr.addColorStop(.65,`rgba(${r},${gg},${b},.14)`);gr.addColorStop(1,`rgba(${r},${gg},${b},0)`);x.fillStyle=gr;x.fillRect(0,0,128,128);return c};
+const GLOW_GOLD=mkGlow(255,206,130),GLOW_RED=mkGlow(255,34,46);
+/* 色のある光：火は金色に地面と人を照らし、血はそれ自体が赤く光って周りを染める（溶岩のように、血がこの世界の光源になる） */
+function drawGlow(){g.save();g.globalCompositeOperation='lighter';const on=y=>y>cam-200&&y<cam+H+200;let sea=false;
+  for(const f of G.fires){if(!f.on||!on(f.y))continue;const fl=.85+.1*Math.sin(G.t*9+f.x)+.05*Math.sin(G.t*17+f.y);g.globalAlpha=.4*fl;g.drawImage(GLOW_GOLD,f.x-175,f.y-135,350,250);g.globalAlpha=.55*fl;g.drawImage(GLOW_GOLD,f.x-36,f.y-46,72,64)}
+  for(const e of E){if(e.dead||e.type!=='lamp'||e.fade<1||!on(e.y))continue;g.globalAlpha=.3;g.drawImage(GLOW_GOLD,e.x-120,e.y-100,240,180)}
+  for(const f of FX){if(f.t!=='fire'||!on(f.y))continue;g.globalAlpha=.34*Math.min(1,f.life);g.drawImage(GLOW_GOLD,f.x-105,f.y-90,210,160)}
+  for(const p of POOLS){if(p.sea){sea=true;continue}if(p.thin||p.r<10||!on(p.y))continue;const R=p.r*2.5;g.globalAlpha=.15+.04*Math.sin(G.t*1.6+p.rot*4);g.drawImage(GLOW_RED,p.x-R,p.y-R*.78,R*2,R*1.56)}
+  if(sea){g.globalAlpha=.07;g.fillStyle='#ff2030';g.fillRect(0,cam,W,H)}
+  g.restore()}
 function renderBG(S){const KH=WH/H,R=seeded((S.pro?99:stageI-1)*977+13),r=(a,b)=>a+R()*(b-a);bg.setTransform(BS,0,0,BS,0,0);bg.clearRect(0,0,W,WH);const th=S.theme;
   const base={village:'#1d1411',bamboo:'#101a14',castle:'#1c1d24',tenshu:'#24170f',beach:'#25231f',port:'#1e1611'}[th];bg.fillStyle=base;bg.fillRect(0,0,W,WH);
   if(th==='port'){let row=0;for(let y=TOP;y<WH;y+=16,row++){bg.fillStyle=`rgba(${r(52,72)|0},${r(36,48)|0},${r(22,30)|0},.65)`;bg.fillRect(0,y,W,15);bg.fillStyle='rgba(0,0,0,.55)';bg.fillRect(0,y+15,W,1);
@@ -1151,10 +1170,12 @@ function renderBG(S){const KH=WH/H,R=seeded((S.pro?99:stageI-1)*977+13),r=(a,b)=
     for(let i=0;i<10*KH;i++){bg.save();bg.translate(r(0,W),r(TOP+90,WH));bg.rotate(r(0,PI));bg.fillStyle=`rgba(${r(50,70)|0},${r(36,46)|0},${r(24,30)|0},.8)`;bg.fillRect(-r(8,18),-2,r(16,36),4);bg.restore()} // 流れ着いた船板
     for(let i=0;i<5*KH;i++){let x=r(30,W-30),y=r(TOP+120,WH-40),a=r(0,TAU);bg.strokeStyle='rgba(120,120,128,.6)';bg.lineWidth=1.3;for(let k=0;k<6;k++){bg.beginPath();bg.ellipse(x,y,3.2,1.8,a+(k%2)*1.2,0,TAU);bg.stroke();a+=r(-.4,.4);x+=Math.cos(a)*5;y+=Math.sin(a)*5}} // 千切れた鎖
     for(let i=0;i<14*KH;i++){bg.fillStyle='rgba(20,30,18,.45)';ell(bg,r(0,W),r(TOP+80,WH),r(4,12),r(1.5,3),r(0,3))}} // 打ち上げられた海藻
-  for(const w of WALLS){w.H=wallH(w,th);w.al=1;w.art=makeWallArt(w,th,R);if(w.art)inkGrade(w.art.cv)}
+  for(const w of WALLS){w.H=wallH(w,th);w.al=1;w.art=makeWallArt(w,th,R);if(w.art){inkGrade(w.art.cv);volShade(w)}}
   // 月は左上：建物の影は右下へ伸びる
   bg.fillStyle='rgba(0,0,8,.46)';
   for(const w of WALLS){const dx=w.H*.55,dy=w.H*.3;bg.beginPath();bg.moveTo(w.x+w.w,w.y);bg.lineTo(w.x+w.w+dx,w.y+dy);bg.lineTo(w.x+w.w+dx,w.y+w.h+dy);bg.lineTo(w.x+dx,w.y+w.h+dy);bg.lineTo(w.x,w.y+w.h);bg.lineTo(w.x,w.y);bg.closePath();bg.fill()}
+  bg.save();bg.shadowColor='rgba(0,0,8,.9)';bg.shadowBlur=26*BS;bg.fillStyle='rgba(0,0,8,.55)';for(const w of WALLS){bg.fillRect(w.x+2,w.y+2,w.w-4,w.h-4);bg.fillRect(w.x+2,w.y+2,w.w-4,w.h-4)}bg.restore(); // 建物の足元に溜まる影
+  for(let i=0;i<26*KH;i++){const x=r(0,W),y=r(TOP,WH),rr=r(60,150),lit=R()<.45,gr=bg.createRadialGradient(x,y,0,x,y,rr);gr.addColorStop(0,lit?'rgba(170,190,240,.07)':'rgba(0,0,6,.2)');gr.addColorStop(1,'rgba(0,0,0,0)');bg.fillStyle=gr;bg.fillRect(x-rr,y-rr,rr*2,rr*2)} // 地面の大きな明暗むら
   for(const [x,y] of (S.fires||[])){bg.fillStyle='rgba(0,0,0,.45)';ell(bg,x,y,20,9);bg.fillStyle='rgba(30,14,6,.9)';ell(bg,x,y,13,6); // 篝火：石の囲いと薪
     for(let k=0;k<9;k++){const a=k/9*TAU;bg.fillStyle=`rgb(${r(70,95)|0},${r(68,90)|0},${r(66,86)|0})`;ell(bg,x+Math.cos(a)*14,y+Math.sin(a)*6.5,3.4,2.4)}
     bg.strokeStyle='#2a1a0e';bg.lineWidth=3;bg.beginPath();bg.moveTo(x-9,y+3);bg.lineTo(x+9,y-3);bg.moveTo(x-9,y-3);bg.lineTo(x+9,y+3);bg.stroke()}
@@ -1267,7 +1288,7 @@ const LCV=mkCv(W/2,H/2),lc=LCV.getContext('2d');
 const DARK={village:.3,bamboo:.44,castle:.46,tenshu:.4,beach:.42,port:.38};
 function lightHole(x,y,r,s){if(s<=0)return;const gr=lc.createRadialGradient(x/2,y/2,0,x/2,y/2,r/2);gr.addColorStop(0,`rgba(0,0,0,${Math.min(1,s)})`);gr.addColorStop(1,'rgba(0,0,0,0)');lc.fillStyle=gr;lc.fillRect((x-r)/2,(y-r)/2,r,r)}
 function drawLighting(){const th=STAGES[stageI].theme;lc.globalCompositeOperation='source-over';lc.clearRect(0,0,LCV.width,LCV.height);
-  lc.fillStyle=`rgba(3,2,12,${(DARK[th]+.2*G.cloudK)*(state==='clear'||state==='ending'?.55:1)})`;lc.fillRect(0,0,LCV.width,LCV.height);
+  lc.fillStyle=`rgba(4,7,30,${(DARK[th]*.74+.2*G.cloudK)*(state==='clear'||state==='ending'?.55:1)})`;lc.fillRect(0,0,LCV.width,LCV.height);
   lc.globalCompositeOperation='destination-out';lc.save();lc.translate(0,-cam/2);
   for(let i=0;i<WALLS.length;i++){const w=WALLS[i],cx=w.x+w.w/2;
     if(th==='village')lightHole(cx,w.y+w.h/2-w.H*.5,140,.75+.15*Math.sin(G.t*7+i*3));
@@ -1544,7 +1565,7 @@ function drawWorld(){
   // 手前・奥の順：足元（床の y）が上のものから描く。建物は南の縁で並べる
   const L=[];for(const w of WALLS)L.push([w.y+w.h,3,w]);for(const e of E)if(!e.dead)L.push([e.y,0,e]);for(const p of PCS)L.push([p.y,1,p]);if(state!=='ending')L.push([P.y,2,null]);for(const k of G.kegs)if(!k.dead)L.push([k.y,4,k]);for(const c of G.caps)L.push([c.y,5,c]);L.sort((a,b)=>a[0]-b[0]);
   for(const [,k,o] of L){if(k===0)drawEnemy(o);else if(k===1)drawPiece(g,o,o.img);else if(k===2)drawPlayer();else if(k===3)drawWall(o);else if(k===4)drawKeg(o);else drawCap(o)}
-  drawLighting();drawWallDyn();drawCloud();
+  drawLighting();drawWallDyn();drawGlow();drawCloud();
   if(G.ougi){g.fillStyle=`rgba(10,0,6,${Math.min(.6,G.ougi.T*3)})`;g.fillRect(0,cam,W,H)} // 奥義：時が止まり、世界が暗く沈む
   for(const t of TRAIL){const k=t.life/t.max;g.save();g.lineCap='round';g.strokeStyle=t.k?`rgba(220,10,40,${.5*k})`:`rgba(180,200,255,${.3*k})`;g.lineWidth=10*k;g.beginPath();g.moveTo(t.x1,t.y1-16);g.lineTo(t.x2,t.y2-16);g.stroke();
     g.strokeStyle=`rgba(255,255,255,${.9*k})`;g.lineWidth=2.4*k;g.stroke();g.restore()}
