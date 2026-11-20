@@ -28,7 +28,7 @@ canvas{display:block;touch-action:none}
    ・暗殺……気づかれていない敵／血遁から出てすぐの攻撃は、雑兵を一撃で倒す
    ・侍は正面の斬撃を弾く。ガードで隙を作るか、4撃目で崩すか、背後・血遁から
    ========================================================= */
-const VERSION='v0.64',VDATE='2026-11-16';
+const VERSION='v0.67',VDATE='2026-11-20';
 const W=450,H=800,TOP=62,TAU=Math.PI*2,PI=Math.PI;
 const JP='"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","MS PMincho",serif';
 const GO='"Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif';
@@ -76,7 +76,7 @@ const KANJI=['序','壱','弐','参','肆','伍','陸'];
    pre＝その段の前に流れる物語（はじめる／次の段へ進んだ時だけ） fires＝篝火（明かり・火の粉） */
 const STAGES=[
  /* 序：五年前の夜。武器はない。敵に見つかれば終わり。血に潜んで浜を抜ける（血遁の由来を遊ぶ） */
- {name:'難破の浜',line:'息を殺せ。血の中なら、見つからない。',when:'天正十年　五島の浜',theme:'beach',h:1500,start:[225,205],pro:true,goal:[225,1432],
+ {name:'難破の浜',line:'息を殺せ。血の中なら、見つからない。',when:'天正十年　五島の浜',theme:'beach',h:1500,start:[225,205],pro:true,goal:[225,1432],gk:'sword',gs:'刀',obj:'浜に流れ着いた刀を拾え',
   fires:[[410,300],[50,1010]],
   pre:{h:'PROLOGUE　奪われた故郷',l:['十一の年、村は銃と火に焼かれた。','父の槍の穂先を握ったまま、少年は鎖につながれた。','名はサレイ。ゴア、マラッカ、マカオ――','五年の船倉で「人には値段がつく」と覚えた。','天正十年、長崎へ向かう船が五島の沖で砕けた。','浜には、生き残りを拾い集める人買いの松明。','武器はない。あるのは、死者から流れた血だけだ。']},
   pools:[[225,275,34],[110,410,32],[335,480,34],[200,615,36],[80,765,32],[305,805,34],[220,965,36],[385,1085,32],[130,1135,34],[250,1285,36],[365,1385,30]],
@@ -84,26 +84,26 @@ const STAGES=[
   waves:[[['ash',345,395],['ash',110,560],['ash',290,705],['ash',145,905],['ash',335,1000],['ash',235,1175],['lamp',110,1265]]]},
  {name:'寄り船の浜',line:'あの夜と同じだ。また、船が砕けた。',when:'天正十五年 春　五島の浜',theme:'beach',start:[225,730],
   fires:[[120,300],[340,570],[255,135]],
-  pre:{h:'CHAPTER 1　漆黒の忍',l:['あの夜、サレイは死者の血に沈み、息を殺した。','月の下では、血も彼の肌も、同じ黒に見えた。','松林で彼を拾ったのは、伊賀を焼かれた老忍・影玄。','「血に隠れたか。ならば、血を術にせよ」','五年が過ぎた。','天正十五年。漆黒の忍は、あの浜へ戻る。']},
+  pre:{h:'CHAPTER 1　漆黒の忍',l:['あの夜、サレイは死者の血に沈み、息を殺した。','浜の果てで、流れ着いた一振りの刀を拾った。','松林で彼を拾ったのは、伊賀を焼かれた老忍・影玄。','「血に隠れたか。ならば、血を術にせよ」','五年が過ぎた。天正十五年。漆黒の忍は、あの浜へ戻る。','浜には今も人買いの松明。杭に、漁師の子が縛られている。']},
   walls:[[40,190,110,34],[300,170,120,40],[190,330,40,32],[30,470,60,44],[330,450,100,36],[110,590,46,34]],
   waves:[[['ash',225,250],['ash',90,400],['ash',370,420]],
          [['ash',80,120],['ash',380,110],['archer',225,130],['ash',260,470]],
          [['ash',60,300],['ash',390,300],['ash',225,110],['archer',70,110],['archer',390,120]]]},
  {name:'人買いの溜め場',line:'檻の数だけ、売られる者がいる。',when:'天正十五年 春　島原の外れ',theme:'village',start:[225,730],
-  pre:{h:'CHAPTER 2　人買いの村',l:['浜の人買いは、獲物を島原の「溜め場」へ運んでいた。','港から集めた人々が、檻に囲われている。','檻の中に、あの船の生き残りの少女がいた。','名はアミナ。','見張りを、ひとり残らず消す。']},
+  pre:{h:'CHAPTER 2　人買いの村',l:['浜の人買いは、獲物を島原の「溜め場」へ運んでいた。','港から集めた人々が、檻に囲われている。','檻の中に、あの船の生き残りの少女がいた。','名はアミナ。','奥の小屋には、売られる前の子がいる。','見張りに気づかれず、連れ出す。']},
   walls:[[30,180,100,70],[320,160,100,80],[175,330,100,50],[20,470,90,90],[340,500,90,70],[150,605,52,40]],
   caps:[[70,640,'cage'],[402,455],[150,140]],
   waves:[[['ash',225,250],['ash',90,400],['archer',370,420],['ash',300,130]],
          [['ash',80,120],['sand',380,110],['archer',225,130],['lamp',260,470]],
          [['samurai',225,120],['ash',60,300],['ash',390,300],['archer',70,110],['archer',390,120]]]},
  {name:'竹林の関',line:'荷車の轍を追う。まだ間に合う。',when:'天正十五年 春　人買い街道',theme:'bamboo',h:1250,start:[225,1185],
-  pre:{h:'CHAPTER 3　鎖の行方',l:['見張りは消えた。だが檻の鍵は、もうなかった。','「先に行って」――アミナはそう言った。','翌朝、彼女を乗せた荷車が街道を北へ向かう。','荷車には、奪った帳簿と同じ印。','南条――九州の人買いを束ねる豪商の印だ。']},
+  pre:{h:'CHAPTER 3　鎖の行方',l:['子は救った。だがアミナの檻の鍵は、もうなかった。','「先に行って」――アミナはそう言った。','翌朝、彼女を乗せた荷車が街道を北へ向かう。','荷車には、奪った帳簿と同じ印。','南条――九州の人買いを束ねる豪商の印だ。','屋敷へ入るには、竹林の関の割符がいる。']},
   walls:[[70,180,60,60],[320,160,70,70],[0,330,150,30],[300,330,150,30],[190,470,70,50],[60,620,60,60],[330,600,70,70],[190,730,70,60],[40,850,70,80],[320,830,80,70],[180,970,80,50],[60,1070,50,50],[350,1070,50,50]],
   waves:[[['ash',225,650],['ash',130,780],['archer',380,740],['lamp',260,900],['samurai',225,255],['archer',90,125]],
          [['samurai',225,610],['archer',90,580],['archer',400,970],['ash',140,1010],['ash',300,700]],
          [['samurai',150,120],['samurai',300,120],['ash',30,420],['sand',420,420],['lamp',225,560],['archer',225,100]]]},
  {name:'南条屋敷 外塀',line:'故郷を焼いた銀は、ここから出た。',when:'天正十五年 初夏　長崎',theme:'castle',start:[225,730],
-  pre:{h:'CHAPTER 4　南条の宴',l:['南条は武士ではない。','表で生糸と火薬を、裏で人を商う男。','秀吉の軍が九州に入り、人の売り買いを禁じた。','南条は最後の「積荷」と共に、海を渡るつもりだ。','今夜、屋敷では南蛮の船長を招いた宴が開かれる。']},
+  pre:{h:'CHAPTER 4　南条の宴',l:['南条は武士ではない。','表で生糸と火薬を、裏で人を商う男。','秀吉の軍が九州に入り、人の売り買いを禁じた。','南条は最後の「積荷」と共に、海を渡るつもりだ。','今夜、屋敷では南蛮の船長を招いた宴が開かれる。','宴の隙に、蔵の古い帳簿を奪う。']},
   walls:[[0,250,150,28],[300,250,150,28],[100,430,24,24],[326,430,24,24],[213,575,24,24],[170,110,110,56]],
   kegs:[[60,215],[392,215],[225,360]],caps:[[60,340],[400,610]],
   waves:[[['lamp',225,330],['samurai',110,170],['archer',340,180],['sand',60,400],['ash',380,520]],
@@ -122,6 +122,21 @@ const STAGES=[
   walls:[[213,420,24,24],[213,860,24,24],[110,330,34,30],[306,560,34,30],[90,760,34,30],[326,1000,34,30],[150,1130,34,30]],
   waves:[[['duarte',225,330],['nanjo',225,130],['gun',90,150],['gun',360,150],['samurai',140,480],['samurai',310,520],['samurai',225,720],['ash',60,820],['ash',390,900],['ash',100,1040]]]},
 ];
+/* v0.67：段を倍の長さに（序はそのまま）。元の配置を180度回した半分を、壱〜肆は奥（上）に、伍・陸は手前（下）に足す。
+   壱〜肆の目的は、一番奥の「救う者・宝」にたどり着くこと（敵を全滅させなくてよい）。伍・陸は、手前の見張りを抜けた所（gateY）から本番 */
+{const rot=(S,L,dy)=>{const ry=(y,h=0)=>TOP+L-(y+h)+dy,rx=(x,w=0)=>W-(x+w);return{walls:S.walls.map(([x,y,w,h])=>[rx(x,w),ry(y,h),w,h]),fires:(S.fires||[]).map(([x,y])=>[rx(x),ry(y)]),kegs:(S.kegs||[]).map(([x,y])=>[rx(x),ry(y)]),pt:([t,x,y])=>[t,rx(x),ry(y)]}};
+ const GOALS={1:{goal:[150,232],gk:'child',gs:'漁師の子',obj:'杭に縛られた漁師の子を救え'},2:{goal:[120,150],gk:'child',gs:'囚われの子',obj:'奥の小屋の子を連れ出せ'},
+   3:{goal:[225,140],gk:'tally',gs:'割符',obj:'関所の割符を奪え'},4:{goal:[225,150],gk:'ledger',gs:'帳簿',obj:'蔵の古い帳簿を奪え'}};
+ for(let i=1;i<=4;i++){const S=STAGES[i],L=S.h||H,R=rot(S,L,0),d=L;
+   S.walls=S.walls.map(([x,y,w,h])=>[x,y+d,w,h]);for(const k of ['fires','kegs'])if(S[k])S[k]=S[k].map(([x,y])=>[x,y+d]);if(S.caps)S.caps=S.caps.map(c=>[c[0],c[1]+d,...c.slice(2)]);
+   const w0=S.waves[0].map(([t,x,y])=>[t,x,y+d]),rest=S.waves.slice(1).flat().map(R.pt);
+   S.walls=R.walls.concat(S.walls);S.fires=R.fires.concat(S.fires||[]);S.kegs=R.kegs.concat(S.kegs||[]);if(!S.kegs.length)delete S.kegs;
+   S.waves=[w0.concat(rest)];S.start=[S.start[0],S.start[1]+d];S.h=L*2;Object.assign(S,GOALS[i])}
+ const APP={5:[['ash',120,1320],['ash',330,1200],['lamp',225,1060],['archer',80,950],['ash',370,920],['archer',225,880]],
+   6:[['ash',110,2380],['ash',340,2250],['lamp',225,2100],['gun',90,1950],['samurai',330,1850],['archer',225,1700],['ash',120,1560],['ash',350,1480]]};
+ for(const i of [5,6]){const S=STAGES[i],L=S.h||H,R=rot(S,L,L);S.walls=S.walls.concat(R.walls);S.fires=(S.fires||[]).concat(R.fires);
+   S.waves=[S.waves[0].concat(APP[i])];S.start=[225,2*L-70];S.h=2*L;S.gateY=L+40}
+ STAGES[5].obj='桟橋の見張りを抜け、龍造寺玄蕃を討て';STAGES[6].obj='甲板へ上がり、鎖を断ち、南条を討て'}
 let WALLS=[];
 
 /* ---------- 状態 ---------- */
@@ -188,6 +203,8 @@ const SFX={
   spawn(){noise(.4,'lowpass',600,150,.22,1,0,.05)},
   ui(){tone('triangle',660,660,.07,.07)},
   die(){tone('sine',220,55,1.5,.3);noise(1.2,'lowpass',600,80,.3,1,0,.05)},
+  chain(n){const f=220*Math.pow(1.19,Math.min(8,n));tone('sine',f,f*.98,.5,.09);tone('triangle',f*1.5,f*1.48,.35,.05,.04);noise(.25,'lowpass',900,200,.25,1,0,.01)}, // 血鎖：つながるほど音が上がる
+  scream(){tone('sawtooth',620,340,.28,.06);tone('sine',880,520,.22,.05,.03)}, // 怯えた叫び
   chin(){tone('sine',3150,3140,.45,.05);tone('sine',4720,4700,.3,.03,.01);noise(.03,'highpass',5000,5000,.08,.7)}, // 納刀の「チン」
   spurt(){noise(.55,'lowpass',900,180,.38,1,0,.02);noise(.3,'bandpass',650,300,.18,2,.07)},          // 遅れて噴き出す血
   cutin(){whoosh(.32,300,4200,.38,1.1);tone('sine',1320,1310,.55,.035,.1)},
@@ -216,7 +233,7 @@ function taiko(at,v){tone('sine',95,48,.45,.5*v,at);noise(.12,'lowpass',260,120,
 function musicTick(){if(!AC||!MUS.theme||muted)return;const now=AC.currentTime;if(MUS.next<now)MUS.next=now+.05;
   while(MUS.next<now+.25){const at=MUS.next-now,st=MUS.step++;
     if(MUS.theme==='boss'){const pat=[1,0,0,.5,0,0,1,0,1,0,.5,0,0,.6,.8,0];const v=pat[st%16];if(v)taiko(at,v);if(st%32===0)flute(at);MUS.next+=.21}
-    else{if(Math.random()<.16)flute(at);if(st%8===0&&Math.random()<.5)taiko(at,.22);MUS.next+=.5}}}
+    else{if(Math.random()<.16)flute(at);if(st%8===0&&Math.random()<.5)taiko(at,.22);if(G.bcT>0&&G.bc>=2){taiko(at,.34);taiko(at+.17,.2)}MUS.next+=.5}}}
 
 /* ---------- 当たり判定 ---------- */
 function hitRect(x,y,r,w){const cx=clamp(x,w.x,w.x+w.w),cy=clamp(y,w.y,w.y+w.h);return (x-cx)*(x-cx)+(y-cy)*(y-cy)<r*r}
@@ -290,7 +307,7 @@ function mkEnemy(type,x,y){const s=ET[type];
   if(type==='nanjo'){e.state='flee';e.alert=1;e.t=0;e.cd=3}
   pushOut(e);E.push(e);return e}
 function mark(e,s){e.mark=s;e.markT=1.1;if(s==='?')G.sus=(G.sus||0)+1}
-function canSee(e){if(state!=='play'||P.dead)return false;
+function canSee(e){if(state!=='play'||P.dead||e.state==='panic')return false;
   const dx=P.x-e.x,dy=P.y-e.y,d=hyp(dx,dy);
   if(P.hidden&&!P.lit&&d>(e.type==='boss'?70:34))return false; // 総大将は気配で近くの血遁を見破る
   const calm=CALM(e.state);
@@ -306,15 +323,20 @@ function decoy(e){if(!(G.decoy>0)||e.elite||e.type==='boss'||e.type==='nanjo')re
     G.decoy--;e.state='search';e.lx=x;e.ly=y;e.t=4;e.stuck=0;e.alert=.3;e.face=Math.atan2(y-e.y,x-e.x);mark(e,'?');SFX.tink();
     FX.push({t:'ring',x,y,r:30,life:.5,max:.5,c:'159,232,176'});popTxt(x,y-18,'石の音','#9fe8b0',14);popTxt(P.x,P.y-46,'陽動　残り '+G.decoy,'#9fe8b0',13);hint('ally');return true}
   return false}
-function toHunt(e,shout){if(e.dead)return;if(STAGES[stageI].pro){caught(e);return}const was=CALM(e.state);e.state='hunt';e.alert=1;e.lx=P.x;e.ly=P.y;e.lost=0;e.cd=Math.max(e.cd,.35);
+/* 警鐘：見つかると、画面の外から増援が来る（10秒に一度まで） */
+function alarm(){const S=STAGES[stageI];if(!(S.goal||S.final)||S.pro||G.alarmCD>0||state!=='play')return;G.alarmCD=10;const ty=stageI>=3?['ash','samurai','gun']:['ash','ash','archer'];let n=0;
+  const ys=[-1,1].map(s=>clamp(P.y+s*430,TOP+30,WH-30)).filter(y=>Math.abs(y-P.y)>=220);if(ys.length===1)ys.push(ys[0]); // 端にいる時は、反対側から二人
+  for(const y of ys){const e=mkEnemy(pick(ty),rand(60,390),y);e.fade=0;e.state='search';e.lx=P.x;e.ly=P.y;e.t=4;e.alert=.6;n++}
+  if(n){SFX.spawn();G.banner={top:'',main:'警　鐘',sub:'見つかった――増援が来る',t:0,dur:1.4,col:'#ffe9a8'};hint('alarm')}}
+function toHunt(e,shout){if(e.dead)return;if(STAGES[stageI].pro){caught(e);return}if(e.state==='panic')return;const was=CALM(e.state);if(was){if(!(G.spotT>0)){G.spot++;alarm()}G.spotT=3}e.state='hunt';e.alert=1;e.lx=P.x;e.ly=P.y;e.lost=0;e.cd=Math.max(e.cd,.35);
   if(was){mark(e,'!');SFX.alert();hint('guard')}
   if(e.type==='samurai')hint('samurai');
   if(shout)for(const o of E)if(o!==e&&!o.dead&&CALM(o.state)&&hyp(o.x-e.x,o.y-e.y)<170&&los(o.x,o.y,e.x,e.y))toHunt(o,false)}
 function noiseAt(x,y,R,needLos){for(const o of E){if(o.dead||!CALM(o.state)||o.type==='boss')continue;const d=hyp(o.x-x,o.y-y);
   if(d<R&&(!needLos||los(o.x,o.y,x,y))){o.state='search';o.lx=x;o.ly=y;o.t=3;o.stuck=0;o.alert=Math.max(o.alert,.55);o.face=Math.atan2(y-o.y,x-o.x);mark(o,'?')}}}
-function moveTo(e,tx,ty,spd,dt){const a0=Math.atan2(ty-e.y,tx-e.x),st=spd*dt;
+function moveTo(e,tx,ty,spd,dt){const a0=Math.atan2(ty-e.y,tx-e.x),st=spd*dt,av=e.fear&&!footBlood(e.x,e.y); // 怯えた者は血を踏まない
   for(const k of [0,.6,-.6,1.2,-1.2,1.8,-1.8]){const a=a0+k*e.steer,nx=e.x+Math.cos(a)*st,ny=e.y+Math.sin(a)*st;
-    if(!blocked(nx,ny,e.r)){e.x=nx;e.y=ny;e.face+=angD(e.face,a)*Math.min(1,dt*8);e.moving=true;e.walkPh+=st*.22;return true}}
+    if(!blocked(nx,ny,e.r)&&!(av&&footBlood(nx,ny))){e.x=nx;e.y=ny;e.face+=angD(e.face,a)*Math.min(1,dt*8);e.moving=true;e.walkPh+=st*.22;return true}}
   e.steer*=-1;return false}
 function patrolTarget(e){for(let i=0;i<10;i++){const a=rand(TAU),d=rand(40,110),x=e.hx+Math.cos(a)*d,y=e.hy+Math.sin(a)*d;
   if(!blocked(x,y,e.r+2)&&los(e.x,e.y,x,y)){e.tx=x;e.ty=y;return}}e.tx=e.hx;e.ty=e.hy}
@@ -324,6 +346,7 @@ function updEnemy(e,dt){
   e.markT=Math.max(0,e.markT-dt);e.hitFlash=Math.max(0,e.hitFlash-dt);e.moving=false;
   if(e.fade<1){e.fade=Math.min(1,e.fade+dt*1.6);return}
   knock(e,dt);
+  if(e.state==='panic'){updPanic(e,dt);return}
   const dx=P.x-e.x,dy=P.y-e.y,d=hyp(dx,dy),ap=Math.atan2(dy,dx),see=canSee(e);
   e.cd-=dt;const run=e.run*(footBlood(e.x,e.y)?.62:1),shooter=e.type==='archer'||e.type==='gun';
   if(CALM(e.state)){
@@ -485,7 +508,7 @@ function strike(e,h){
     if(amb)popTxt(e.x,e.y-44,'不意打ち','#ff4a5a',20);
     e.kx=Math.cos(h.ang)*(h.kb||160)*.5;e.ky=Math.sin(h.ang)*(h.kb||160)*.5;return eliteHit(e,amb?5:h.dmg,h.ang,amb?1:footBlood(e.x,e.y)?.6:0)} /* 正面からの斬撃ではひるまない（連撃で固められない）。血の上か、不意打ちの時だけよろける */
   if(h.kind==='ougi'){kill(e,h.ang,'ougi');return 'kill'}
-  const unaware=h.kind!=='shuri'&&(CALM(e.state)||h.assn);
+  const unaware=h.kind!=='shuri'&&(CALM(e.state)||h.assn||e.state==='panic');
   if(unaware){kill(e,h.ang,'assn');return 'kill'}
   if(e.type==='samurai'&&front&&e.state==='hunt'&&!footBlood(e.x,e.y)){ // 侍は正面を刀で受ける（血の上では踏ん張れず、受けきれない）
     const mx=(P.x+e.x)/2,my=(P.y+e.y)/2;e.face=h.ang+PI;hint('samurai');
@@ -517,6 +540,13 @@ function strikeBoss(e,h,front){
   if(!e.p2&&e.hp<=e.maxhp/2){e.p2=true;SFX.roar();G.banner={top:'',main:'玄蕃、怒り狂う',sub:'攻撃が激しくなる',t:0,dur:2.2,col:'#ff4a4a'}}
   if(e.state==='look'){e.state='walk';e.lost=0;e.lx=P.x;e.ly=P.y}
   return 'hit'}
+/* 得点：血鎖の間は倍率がかかる。数字は青白く小さく（赤は血だけ） */
+function addScore(v,x,y,lab){if(STAGES[stageI].pro)return;const m=G.bcT>0&&G.bc>=2?1+.5*(G.bc-1):1,s=Math.round(v*m/10)*10;G.score+=s;if(x!==undefined&&m===1)popTxt(x+18,y-14,'+'+s,'#cfd8ff',11)}
+/* 血鎖：血から仕留めるたびに伸びる。3.2秒、血から倒さないと切れる */
+function bloodChain(e){G.bc=G.bcT>0?G.bc+1:1;G.bcT=3.2;G.maxBc=Math.max(G.maxBc,G.bc);SFX.chain(G.bc);hint('chain');
+  if(G.bc>=2){G.big={s:'血鎖 '+['','','二','三','四','五','六','七','八','九'][Math.min(9,G.bc)]+(G.bc>9?'+':''),t:0,dur:G.bc===3?1.3:.8,col:G.bc>=5?'#ff1030':G.bc>=3?'#ff3048':'#ff6a7a'};G.flash=Math.max(G.flash,.12+.03*G.bc);G.flashC='#5a0010'}
+  if(G.bc===3)terrorBurst(); // 三連：周りの敵が総崩れになる
+  if(G.bc===5){addSoul(40);popTxt(P.x,P.y-60,'血の鬼','#ff2040',22)}}
 function addChain(){G.chain++;G.chainT=3;G.maxChain=Math.max(G.maxChain,G.chain)}
 function kill(e,a,mode){
   e.dead=true;G.kills++;G.lkx=e.x;G.lky=e.y;const assn=mode==='assn',drag=assn&&!e.spear&&P.hidT>0&&!P.swim&&footBlood(e.x,e.y); // 血の中からの暗殺：敵を血へ引きずり込む（音も死体も残らない）
@@ -529,10 +559,27 @@ function kill(e,a,mode){
   splat(e.x,e.y,a,.35);const R0=(assn?42:31)+(drag?10:0),pl=addPool(e.x+Math.cos(a)*10,e.y+Math.sin(a)*10,R0*.55);G.pend.push({x:e.x,y:e.y,a,pl,R:R0,k:assn?1.3:1,sh:(drag||e.spear||mode==='purge'||mode==='ougi')?null:G.hk});G.hk=null;G.pendT=0;if(mode!=='purge')hint('shape');
   FX.push({t:'cut',x:e.x,y:e.y,a,life:.22,max:.22});FX.push({t:'light',x:e.x,y:e.y,r:70,life:.2,max:.2});if(drag){FX.push({t:'sink',x:e.x,y:e.y,a:e.face,k:e.type,life:.95,max:.95});FX.push({t:'ring',x:e.x,y:e.y,r:48,life:.6,max:.6,c:'150,10,25'});for(let i=0;i<7;i++)FX.push({t:'blood',x:e.x+rand(-10,10),y:e.y+rand(-3,3),z:4,vz:rand(90,180),vx:rand(-55,55),vy:rand(-20,20),life:.9,max:.9,s:rand(1.4,2.6)})}else mkCorpse(e,a);hint('blood');
   if(mode==='ougi'&&e.spear)popTxt(e.x,e.y-44,'串刺し','#ff2040',18);
-  if(e.type==='nanjo'){G.njDead=true;cutIn('仇','南条、血の海に沈む','#ff3048',1.4)}else if(e.type==='duarte')cutIn('討','船長ドゥアルテ、討ち取ったり','#ff3048',1.3);
+  const bloodK=mode!=='purge'&&(drag||e.spear),terrK=mode!=='purge'&&!bloodK&&e.state==='panic'&&G.bcT>0; // 血鎖の間に、怯えた者を斬っても鎖は伸びる
+  if(mode!=='purge'){if(bloodK||terrK)bloodChain(e);addScore((e.spear?(mode==='ougi'?250:300):drag?400:assn?200:100)*(STAGES[stageI].goal?.25:1),e.x,e.y-58,e.spear?'血槍':drag?'引込':assn?'暗殺':'')}
+  if(e.type==='nanjo'){G.njDead=true;addScore(3000);cutIn('仇','南条、血の海に沈む','#ff3048',1.4)}else if(e.type==='duarte')cutIn('討','船長ドゥアルテ、討ち取ったり','#ff3048',1.3);
   if(e.type==='lamp'){FX.push({t:'fire',x:e.x+Math.cos(a)*14,y:e.y+Math.sin(a)*14,life:5,max:5});popTxt(e.x,e.y-40,'灯が落ちた','#ffc070',13)} // 提灯が落ちて燃える
   const S=STAGES[stageI];if(!S.boss&&G.wave+1>=S.waves.length&&!E.some(o=>o!==e&&!o.dead)){G.slowT=Math.max(G.slowT,.9);G.flash=Math.max(G.flash,.3);G.flashC='#fff'} // 最後の一人：長いスロー
-  if(!drag)noiseAt(e.x,e.y,assn?100:165,true)} // 斬った音に、近くの敵が気づく
+  if(!drag)noiseAt(e.x,e.y,assn?100:165,true); // 斬った音に、近くの敵が気づく
+  if(bloodK)witness(e)}
+/* 2) 恐怖：仲間が血に引き込まれる／串刺しになるのを見た者は、恐慌して逃げ出す */
+const FEARLESS=e=>e.type==='boss'||e.elite||e.type==='nanjo';
+function panic(o,fx,fy,t){if(o.dead||FEARLESS(o)||o.fade<1)return;const was=o.state==='panic';o.state='panic';o.t=t||rand(2.6,3.4);o.fx=fx;o.fy=fy;o.fear=1;o.pT=0;o.alert=0;o.cd=Math.max(o.cd,1);
+  if(!was){G.terror++;mark(o,'怯');if(Math.random()<.6)popTxt(o.x,o.y-48,pick(['ひっ……！','血から何かが……！','化け物だ！','来るな、来るな！']),'#e8ecff',13);hint('terror')}}
+function witness(e){if(STAGES[stageI].pro)return;let n=0;for(const o of E){if(o===e||o.dead||FEARLESS(o)||o.fade<1)continue;const d=hyp(o.x-e.x,o.y-e.y);if(d>250||!los(o.x,o.y,e.x,e.y))continue;
+    if(d<120||Math.abs(angD(o.face,Math.atan2(e.y-o.y,e.x-o.x)))<1.3||o.state==='hunt'){panic(o,e.x,e.y);n++}}if(n)SFX.scream()}
+function terrorBurst(){let n=0;for(const o of E){if(o.dead||FEARLESS(o)||o.fade<1)continue;if(hyp(o.x-P.x,o.y-P.y)<330){panic(o,P.x,P.y,rand(3.2,4));n++}}
+  if(n){SFX.scream();if(G.big)G.big.s+='　総崩れ'}}
+/* 恐慌：殺された場所と主人公から離れる向きへ走る。血は踏まない。周りが見えていない */
+function updPanic(e,dt){e.t-=dt;e.pT-=dt;
+  if(e.pT<=0){e.pT=.45;let bs=-1e9;for(let k=0;k<12;k++){const a=k/12*TAU,x=e.x+Math.cos(a)*110,y=e.y+Math.sin(a)*110;if(blocked(x,y,e.r+2))continue;
+      const sc=hyp(x-e.fx,y-e.fy)+.8*hyp(x-P.x,y-P.y)-(footBlood(x,y)?260:0)+rand(0,30);if(sc>bs){bs=sc;e.tx=x;e.ty=y}}}
+  if(!moveTo(e,e.tx,e.ty,e.run*1.05*(footBlood(e.x,e.y)?.62:1),dt))e.pT=0;
+  if(e.t<=0){e.state='search';e.lx=e.x;e.ly=e.y;e.t=2.4;e.alert=.15;e.stuck=0;e.face+=PI}}
 function bossDie(e,a){e.dead=true;G.kills++;G.lkx=e.x;G.lky=e.y;G.slowT=1.4;G.shake=16;G.flash=.6;G.flashC='#fff';
   SFX.kill(true);SFX.gong();splat(e.x,e.y,a,1.8);splat(e.x,e.y,a+PI,1.2);addPool(e.x,e.y,62);mkCorpse(e,a);
   cutIn('討','龍造寺玄蕃、討ち取ったり','#ff3048',1.5);G.purge=.7}
@@ -629,7 +676,7 @@ function explode(k){k.dead=true;SFX.boom();G.shake=16;G.flash=.45;G.flashC='#ffb
 function freeCap(c){if(c.k==='cage'){if(c.t>0)return;c.t=.8;SFX.tink();sparks(c.x,c.y+4,6);popTxt(c.x,c.y-44,'鉄の檻――鍵がない','#c8c8d8',13);return}
   /* 燃える甲板の鎖は太い：三度斬って断つ */
   if(STAGES[stageI].burn){if(c.t>0)return;c.ch=(c.ch||0)+1;if(c.ch<3){c.t=.16;SFX.tink();sparks(c.x-8,c.y+2,5,'200,210,230');popTxt(c.x,c.y-36,'鎖 '+c.ch+'／3','#c8d0e0',13);return}}
-  c.freed=true;c.t=0;G.freedN++;SFX.free();sparks(c.x-8,c.y+2,8,'200,210,230');popTxt(c.x,c.y-36,'解放','#9fe8b0',18);addSoul(20);hintDone('cap');
+  c.freed=true;c.t=0;G.freedN++;addScore(500,c.x,c.y-56,'解放');SFX.free();sparks(c.x-8,c.y+2,8,'200,210,230');popTxt(c.x,c.y-36,'解放','#9fe8b0',18);addSoul(20);hintDone('cap');
   if(P.hp<P.maxhp){P.hp++;popTxt(P.x,P.y-26,'回復','#ff9aa5',13);SFX.heal()}}
 // 雲・潮・導火線・火の手
 function updProps(dt){const S=STAGES[stageI];
@@ -639,9 +686,9 @@ function updProps(dt){const S=STAGES[stageI];
   for(const k of G.kegs){if(k.dead)continue;
     if(k.fuse>=0){k.fuse-=dt;if(Math.random()<.7)FX.push({t:'spark',x:k.x+4,y:k.y-3,vx:rand(-60,60),vy:rand(-60,60),life:.2,max:.2,c:'255,200,90'});if(k.fuse<=0)explode(k)}
     else if(hyp(k.x-P.x,k.y-P.y)<130)hint('keg')}
-  if(S.burn)G.burn+=dt;
+  if(S.burn&&G.gateOn)G.burn+=dt;
   /* 陸：南条は小舟で逃げる。期限までに討てなければ、仇は海の向こうへ消える */
-  if(S.final&&G.fleeT>0){const nj=E.find(o=>o.type==='nanjo'&&!o.dead);if(nj&&nj.fade>=1){G.fleeT-=dt;
+  if(S.final&&G.fleeT>0&&G.gateOn){const nj=E.find(o=>o.type==='nanjo'&&!o.dead);if(nj&&nj.fade>=1){G.fleeT-=dt;
     if(G.fleeT<15&&!G.fleeW){G.fleeW=1;popTxt(225,cam+TOP+92,'南条が小舟を下ろしている','#ffb060',15);SFX.tink()}
     if(G.fleeT<=0){G.fleeT=0;nj.dead=true;G.njFled=true;smoke(nj.x,nj.y);SFX.spawn();G.banner={top:'',main:'南条、逃走',sub:'小舟は闇の沖へ消えた',t:0,dur:2.4,col:'#ffb060'}}}}
   for(const c of G.caps){if(c.freed){c.t+=dt;continue}if(c.dead)continue;if(c.t>0)c.t=Math.max(0,c.t-dt);
@@ -727,7 +774,8 @@ const TIPS=['敵の視界（光）の外から斬れば、一撃で倒せる','�
   '侍は正面の斬撃を弾く。攻撃をガードすると隙ができる','手裏剣を壁に当てると、音で敵をおびき寄せられる','新しい血を見た敵は、調べに血の上へ来る',
   '提灯持ちを先に倒すと、血遁が安全になる','血遁の間は、少しずつ体力が戻る','2体以上斬って手を止めると、納刀で血の海が広がる',
   '斬った後に歩くと血の道ができる。離れた血だまり同士をつなげ','侍は血の上では踏ん張れない。血の上で斬れ','血の中で奥義を使うと、血の上の敵をまとめて串刺しにできる',
-  '鉄砲は防げない。血に潜れば狙いが外れる','火薬樽は手裏剣で遠くから爆発させられる','雲が月を隠す間は、敵の目が利かない','手裏剣を提灯持ちに当てると、灯を落とせる'];
+  '鉄砲は防げない。血に潜れば狙いが外れる','火薬樽は手裏剣で遠くから爆発させられる','雲が月を隠す間は、敵の目が利かない','手裏剣を提灯持ちに当てると、灯を落とせる','血槍のあとは血の中にいる。止まらず次の血槍へ――血鎖三連で敵は総崩れ',
+  '怯えた敵は血を踏まない。血だまりで道をふさぎ、追い込め','一度も見つからずに抜けると、得点に「影」のボーナス','斬るのは道をふさぐ者だけでいい。斬らずに抜けると「不殺」のボーナス'];
 function swimNet(){const ps=POOLS.filter(p=>!p.sea&&p.r>8&&!(p.delay>0));
   const start=ps.filter(p=>hyp(P.x-p.x,P.y-p.y)<p.r*.85);if(!start.length)return null;
   const seen=new Set(start),q=start.slice(),par=new Map();
@@ -761,14 +809,16 @@ function emerge(){const S=P.swim;P.swim=null;pushOut(P);P.inv=Math.max(P.inv,.3)
   if(e&&!e.dead&&hyp(e.x-P.x,e.y-P.y)<e.r+P.r+30){P.face=Math.atan2(e.y-P.y,e.x-P.x);SFX.spear();FX.push({t:'spike',x:e.x,y:e.y,life:.45,max:.45,big:e.type==='boss'?1:0});G.spears++;
     if(e.type==='boss'){e.hp-=3;e.hitFlash=.2;e.state='stun';e.t=1.2;G.stop=Math.max(G.stop,.08);splat(e.x,e.y,-PI/2,.8);popTxt(e.x,e.y-60,'血槍 −3','#ff2040',20);addChain();if(e.hp<=0)bossDie(e,-PI/2)}
     else if(e.elite){popTxt(e.x,e.y-56,'血槍 −5','#ff2040',20);addChain();eliteHit(e,5,-PI/2,1.2)}
-    else{e.spear=true;kill(e,-PI/2,'assn');popTxt(e.x,e.y-44,'血槍','#ff2040',22)}
-    P.dashCD=.45}
+    else{e.spear=true;kill(e,-PI/2,'assn');popTxt(e.x,e.y-44,'血槍','#ff2040',22);
+      /* 倒した者の血は、そのまま自分の潜る血になる：すぐ次の血渡りへつなげる */
+      const q=G.pend.length?G.pend[G.pend.length-1]:null;if(q&&q.pl){q.pl.x=(P.x+e.x)/2;q.pl.y=(P.y+e.y)/2;q.pl.R=Math.max(q.pl.R,40);q.pl.r=Math.max(q.pl.r,34);q.pl.inv=1}}
+    P.dashCD=G.bc>=2?.12:.3}
   else P.dashCD=DASH_CD*.6}
 // 提灯持ち：周りを照らす。その明かりの中では、血遁でも見つかる
 function litBy(){for(const e of E)if(!e.dead&&e.type==='lamp'&&e.fade>=1&&hyp(e.x-P.x,e.y-P.y)<LAMP_R&&los(e.x,e.y,P.x,P.y))return 1;
   for(const f of G.fires)if(f.on&&hyp(f.x-P.x,f.y-P.y)<FIRE_R&&los(f.x,f.y,P.x,P.y))return 2;return false}
 // 新しい血（10秒以内）に気づいた見回りの敵は、それを調べに血の上へ来る（血槍の罠に誘い込める）
-function lureCheck(e,dt){e.lureT=(e.lureT||0)-dt;if(e.lureT>0)return false;e.lureT=.4;
+function lureCheck(e,dt){if(e.fear)return false;e.lureT=(e.lureT||0)-dt;if(e.lureT>0)return false;e.lureT=.4;
   for(const p of POOLS){if(p.sea||p.inv||p.r<10||G.time-(p.born||0)>10)continue;const dx=p.x-e.x,dy=p.y-e.y,d=hyp(dx,dy);if(d>seeR()*.85||d<20)continue;
     if(Math.abs(angD(e.face,Math.atan2(dy,dx)))>SEE_HALF||!los(e.x,e.y,p.x,p.y))continue;
     p.inv=1;e.state='search';e.lx=p.x;e.ly=p.y;e.t=3.5;e.stuck=0;e.alert=Math.max(e.alert,.4);mark(e,'?');popTxt(e.x,e.y-34,'血……？','#ffb0b0',13);hint('lure');return true}
@@ -904,6 +954,11 @@ const HINTS={
   shape:['斬り方で血の形が変わる　払いは扇、一閃は細長い筋、回転斬りは円','斬り方で血の形が変わる　払いは扇、一閃は細長い筋、回転斬りは円',9],
   fprint:['血を踏んだ敵は赤い足跡を残す　足跡も血渡りの道になる','血を踏んだ敵は赤い足跡を残す　足跡も血渡りの道になる',9],
   ally:['鎖を断った人が石を投げ、敵の気をそらした（緑の点＝残り回数）','鎖を断った人が石を投げ、敵の気をそらした（緑の点＝残り回数）',9],
+  chain:['血槍で倒すと、その血にそのまま潜っている　すぐ次の血渡りで【血鎖】','血槍で倒すと、その血にそのまま潜っている　すぐ次の血渡りで【血鎖】',9],
+  terror:['血に引き込まれるのを見た敵は【恐慌】　逃げ惑い、一太刀で斬れる','血に引き込まれるのを見た敵は【恐慌】　逃げ惑い、一太刀で斬れる',9],
+  moves:['技が分からなくなったら：一時停止（右上の ‖ ）→【技表】','技が分からなくなったら：P で一時停止 →【技表】',8],
+  goal:['奥の目的へ。見つからず、斬らずに抜けるほど高得点　敵を全滅させなくてよい','奥の目的へ。見つからず、斬らずに抜けるほど高得点　敵を全滅させなくてよい',10],
+  alarm:['見つかると警鐘が鳴り、増援が来る　血に潜ってやり過ごせ','見つかると警鐘が鳴り、増援が来る　血に潜ってやり過ごせ',8],
   pro:['武器はない　敵の視界（光）を避け、血だまりに潜んでやり過ごせ','武器はない　敵の視界（光）を避け、血だまりに潜んでやり過ごせ',10],
   run:['すばやく動くと足音が立つ　ゆっくり動けば気づかれない','すばやく動くと足音が立つ　ゆっくり動けば気づかれない',8]};
 /* なぞり操作の時だけ差し替えるヒント */
@@ -929,13 +984,14 @@ function startStage(i){
     hq:[],hint:null,purge:-1,ending:false,introT:0,clearT:0,deadT:0,paused:false,ambT:0,pend:[],pendT:0,sheathT:0,cut:null,cutCd:0,fgT:0,swims:0,spears:0,swimNet:null,swimPick:null,
     fires:(S.fires||[]).map(([x,y])=>({x,y,on:true})),kegs:(S.kegs||[]).map(([x,y])=>({x,y,fuse:-1,dead:false})),
     caps:(S.caps||[]).map(c=>({x:c[0],y:c[1],k:c[2]||'',dieAt:c[3]||0,freed:false,dead:false,t:0,sk:pick(['#4a3020','#3a2416','#a88262','#5a3a26'])})),
-    allies:0,decoy:0,hk:null,cloudT:rand(13,17),cloudK:0,cloudOn:0,tideT:9,tideY:0,tideW:0,burn:0,freedN:0,capRes:null,fleeT:S.final?65:0,sus:0,fleeW:0,njDead:false,njFled:false});
+    allies:0,decoy:0,hk:null,bc:0,bcT:0,maxBc:0,score:0,spot:0,spotT:0,alarmCD:0,terror:0,scoreNew:false,gateOn:!S.gateY,cloudT:rand(13,17),cloudK:0,cloudOn:0,tideT:9,tideY:0,tideW:0,burn:0,freedN:0,capRes:null,fleeT:S.final?65:0,sus:0,fleeW:0,njDead:false,njFled:false});
   WH=S.h||H;bgCv.height=blCv.height=WH*BS;cam=clamp(P.y-H*.56,0,WH-H);
   renderBG(S);bl.setTransform(1,0,0,1,0,0);bl.clearRect(0,0,blCv.width,blCv.height);
   for(const [x,y,R] of (S.pools||[])){const p=addPool(x,y,R);p.r=R;p.born=-99;p.inv=1} // 最初から流れている血（難破の死者の血）
-  if(S.final)NJ_PTS=[50,400,225].flatMap(x=>[110,WH*.5,WH-80].map(y=>[x,y]));
+  if(S.final){const Y=S.gateY||WH;NJ_PTS=[50,400,225].flatMap(x=>[110,Y*.5,Y-80].map(y=>[x,y]))}
   if(!S.pro){const fr=LS.get('freed6',{});let n=0;for(const k in fr)if(+k<i)n+=fr[k];G.allies=G.decoy=Math.min(3,n)}
-  spawnWave(0);state='intro';musicStart(S.boss||S.final?'boss':'field');
+  spawnWave(0);if(S.gateY)for(const e of E)if(e.type==='boss'||e.type==='duarte'||e.type==='nanjo')e.sleep=1; // 奥の本番は、手前を抜けるまで眠っている
+  state='intro';musicStart(S.boss||S.final?'boss':'field');
   for(let k=0;k<40;k++)ambient(.5)}
 function spawnWave(n){const S=STAGES[stageI];if(S.waves[n].some(q=>q[0]==='lamp'))hint('lamp');if(S.waves[n].some(q=>q[0]==='gun'||q[0]==='duarte'))hint('gun');
   for(const [t,x0,y0] of S.waves[n]){let x=x0,y=y0;if(n>0&&hyp(x-P.x,y-P.y)<200){[x,y]=freeSpot(240)}
@@ -943,26 +999,36 @@ function spawnWave(n){const S=STAGES[stageI];if(S.waves[n].some(q=>q[0]==='lamp'
   if(n>0){SFX.spawn();G.banner={top:'',main:'増 援',sub:'',t:0,dur:1.4,col:'#ffe9a8'};if(stageI===1)hint('dash')}}
 function beginPlay(){state='play';const S=STAGES[stageI];
   if(S.pro){hint('move');hint('pro')}
-  if(stageI===1){hint('move');hint('stealth')}
+  if(stageI===1){hint('move');hint('stealth');hint('moves')}
   if(stageI===2)hint('shuri');
+  if(S.goal&&!S.pro)hint('goal');
+  if(G.gateOn)stageBanner(S)}
+function stageBanner(S){
   if(S.boss){G.banner={top:'南条の用心棒　沖田畷の落ち武者',main:'龍造寺 玄蕃',sub:'「主を失った刀だ。今は銀のために振るう」',t:0,dur:3.2,col:'#ffe9a8'};SFX.roar()}
   if(S.burn){G.banner={top:'火の手が回る',main:'鎖か、仇か',sub:'炎は人々を焼き、南条は小舟で逃げる',t:0,dur:3.2,col:'#ffb060'};SFX.roar()}}
 const capN=()=>G.caps.filter(c=>c.k!=='cage').length;
 const capsLeft=()=>!!STAGES[stageI].final&&G.caps.some(c=>!c.freed&&!c.dead&&c.k!=='cage'); // 陸は、鎖の人が残る間は終わらない
-function rankOf(){if(STAGES[stageI].pro)return G.sus===0?'S':G.sus<=2?'A':'B';const r=G.kills?G.assn/G.kills:0;if(G.hits===0&&G.freedN>=capN()&&(!STAGES[stageI].final||G.njDead)&&(r>=.4||STAGES[stageI].boss))return 'S';if(G.hits<=1)return 'A';if(G.hits<=3)return 'B';return 'C'}
+function rankOf(){if(STAGES[stageI].pro)return G.sus===0?'S':G.sus<=2?'A':'B';
+  if(STAGES[stageI].goal){if(G.spot===0&&G.kills<=2&&G.freedN>=capN())return 'S';if(G.spot<=2&&G.hits<=1)return 'A';if(G.hits<=3)return 'B';return 'C'} /* 忍びの段：見つからず、斬らずに抜けるほど高い */
+  const r=G.kills?G.assn/G.kills:0;if(G.hits===0&&G.freedN>=capN()&&(!STAGES[stageI].final||G.njDead)&&(r>=.4||STAGES[stageI].boss))return 'S';if(G.hits<=1)return 'A';if(G.hits<=3)return 'B';return 'C'}
 function stageClear(){state='clear';if(P.swim){P.swim=null;pushOut(P)}G.swimNet=G.swimPick=null;G.clearT=0;G.rank=rankOf();SFX.gong();resetTouch();
-  for(const c of G.caps)if(!c.freed&&!c.dead&&c.k!=='cage'){c.freed=true;c.t=0} // 敵がいなくなれば、残った人も助かる
+  {const S0=STAGES[stageI];G.bonus=[];const B=(k,v)=>{if(v>0){G.bonus.push([k,v]);G.score+=v}};G.bcT=0;
+    if(S0.pro){B('潜み切り',G.sus===0?5000:Math.max(0,3000-G.sus*800));B('早さ',Math.max(0,Math.round((150-G.time)*20)))}
+    else{B('影（一度も見つからず）',G.spot===0?3000:0);if(S0.goal){B('不殺',G.kills===0?5000:0);B('少殺',G.kills>0?Math.max(0,2500-500*G.kills):0)}B('無傷',G.hits===0?1500:0);
+      B('早さ',Math.max(0,Math.round(((S0.goal?WH/800*70:S0.boss?160:200)-G.time)*15)))}
+    const sb=LS.get('score6',{});G.scoreNew=!(sb[stageI]>=G.score);if(G.scoreNew){sb[stageI]=G.score;LS.set('score6',sb)}G.bestScore=sb[stageI]}
+  if(!STAGES[stageI].goal)for(const c of G.caps)if(!c.freed&&!c.dead&&c.k!=='cage'){c.freed=true;c.t=0} // 敵がいなくなれば、残った人も助かる
   if(STAGES[stageI].final){G.ending=true;const cs=G.caps;G.capRes={n:cs.length,freed:cs.filter(c=>c.freed).length,amina:cs.some(c=>c.k==='amina'&&c.freed),nj:G.njDead}}
 
   const best=LS.get('best6',{}),RK='CBAS';if(!best[stageI]||RK.indexOf(G.rank)>RK.indexOf(best[stageI]))best[stageI]=G.rank;LS.set('best6',best);
   LS.set('unl6',Math.max(LS.get('unl6',1),Math.min(STAGES.length,stageI+2)));
   if(capN()){const fr=LS.get('freed6',{});fr[stageI]=Math.max(fr[stageI]||0,G.freedN);LS.set('freed6',fr)} // 自分の手で鎖を断った人数を覚えておく（後の段で助けに来る）
-  if(STAGES[stageI].pro)return; // 序は誰も斬らない：血の海にはならない
+  if(STAGES[stageI].goal)return; // 忍んで抜けた段は、血の海にはならない
   for(let y=TOP-6;y<WH+40;y+=52)for(let x=10;x<W+40;x+=52){const xx=x+rand(-14,14),yy=y+rand(-14,14);addPool(xx,yy,rand(40,52),hyp(xx-G.lkx,yy-G.lky)/420,true)}}
 function nextFromClear(){if(G.ending){state='ending';G.endT=0;cam=0;P.x=225;P.y=560;P.face=PI/2;initScarf();musicStart('field');return}if(stageI+1<STAGES.length)startStory(stageI+1);else toTitle()}
-function startStory(i){if(!STAGES[i].pre){startStage(i);return}state='story';G.story={i,t:0};G.paused=false;resetTouch()}
+function startStory(i){G.moves=false;if(!STAGES[i].pre){startStage(i);return}state='story';G.story={i,t:0};G.paused=false;resetTouch()}
 function storyLen(){return STAGES[G.story.i].pre.l.length*2.1+3.2}
-function toTitle(){state='title';G.paused=false;G.titleT=0;resetTouch();musicStart('field')}
+function toTitle(){state='title';G.paused=false;G.moves=false;G.titleT=0;resetTouch();musicStart('field')}
 /* 血を踏んだ敵は、しばらく赤い足跡を残す。足跡は細い血の道になり、血渡りでたどれる */
 function footprints(){for(const e of E){if(e.dead||e.fade<1||e.type==='boss')continue;const mv=e.fpx===undefined?0:hyp(e.x-e.fpx,e.y-e.fpy);e.fpx=e.x;e.fpy=e.y;
   if(footBlood(e.x,e.y)){e.bloody=190;e.fpd=20;e.fpl=null;continue}
@@ -988,20 +1054,24 @@ function update(rdt){
     if(G.ougi)updOugi(rdt);
     else{
       updPlayer(dt);
-      for(const e of E)if(!e.dead)(e.type==='boss'?updBoss:e.type==='duarte'?updDuarte:e.type==='nanjo'?updNanjo:updEnemy)(e,dt);
+      for(const e of E)if(!e.dead&&!e.sleep)(e.type==='boss'?updBoss:e.type==='duarte'?updDuarte:e.type==='nanjo'?updNanjo:updEnemy)(e,dt);
       separate();footprints();
       for(const a of ARR){if(a.dead)continue;a.x+=a.vx*dt;a.y+=a.vy*dt;a.life-=dt;
         if(blocked(a.x,a.y,1)){a.dead=true;if(a.gun)sparks(a.x,a.y+20,4);else if(a.x>0&&a.x<W&&a.y>TOP&&a.y<WH){blSet();bl.strokeStyle='rgba(120,90,60,.8)';bl.lineWidth=1.2;bl.beginPath();bl.moveTo(a.x,a.y);bl.lineTo(a.x-Math.cos(a.a)*9,a.y-Math.sin(a.a)*9);bl.stroke()}}
         else if(!P.dash&&(a.gun?segDist(P.x,P.y,a.x-a.vx*dt,a.y-a.vy*dt,a.x,a.y):hyp(a.x-P.x,a.y-P.y))<P.r+3){a.dead=true;hurt(a.x-a.vx*.05,a.y-a.vy*.05,{push:60,unblock:!!a.gun})}else if(a.life<=0)a.dead=true}
       ARR=ARR.filter(a=>!a.dead);
       updShuriken(dt);updProps(dt);
+      {const S0=STAGES[stageI];if(!G.gateOn&&P.y<S0.gateY){G.gateOn=true;for(const e of E)e.sleep=0;stageBanner(S0)}} // 手前を抜けた：本番が始まる
       if(!G.seen.atk&&G.seen.move)for(const e of E)if(hyp(e.x-P.x,e.y-P.y)<150){hint('atk');break}
     }
     if(G.purge>0){G.purge-=dt;if(G.purge<=0){for(const o of E)if(!o.dead)kill(o,Math.atan2(o.y-G.lky,o.x-G.lkx),'purge');popTxt(225,cam+TOP+90,'残党、総崩れ','#ffb0b0',16)}}
     E=E.filter(e=>!e.dead);
     if(G.chainT>0){G.chainT-=dt;if(G.chainT<=0)G.chain=0}
-    {const S0=STAGES[stageI];if(S0.pro&&!P.dead&&hyp(P.x-S0.goal[0],P.y-S0.goal[1])<44){for(const o of E)o.dead=true;E=[];stageClear()}}
-    if(state==='play'&&!P.dead&&E.length===0&&!G.ougi&&!capsLeft()){G.waveT+=rdt;const S=STAGES[stageI];
+    if(G.bcT>0&&!P.swim){G.bcT-=dt;if(G.bcT<=0)G.bc=0} // 血鎖：血の中を渡る間は切れない
+    if(G.spotT>0)G.spotT-=dt;if(G.alarmCD>0)G.alarmCD-=dt;
+    {const S0=STAGES[stageI];if(S0.goal&&!P.dead&&!P.swim&&!G.ougi&&hyp(P.x-S0.goal[0],P.y-S0.goal[1])<40){for(const o of E)o.dead=true;E=[];stageClear()} // 目的にたどり着いた
+      if(S0.final&&state==='play'&&!P.dead&&!G.ougi&&G.gateOn&&(G.njDead||G.njFled)&&!capsLeft()){G.waveT+=rdt;if(G.waveT>1.9)stageClear()}} // 陸：南条の決着がつき、鎖の人が残っていなければ終わり
+    if(state==='play'&&!P.dead&&E.length===0&&!G.ougi&&!capsLeft()&&!STAGES[stageI].goal&&!STAGES[stageI].final){G.waveT+=rdt;const S=STAGES[stageI];
       if(G.wave+1<S.waves.length){if(G.waveT>1.1){G.wave++;G.waveT=0;spawnWave(G.wave)}}
       else if(G.waveT>(G.ending?1.9:1.1))stageClear()}
     if(P.dead){G.deadT+=rdt;if(G.deadT>1.9){state='over';G.overT=0}}
@@ -1097,6 +1167,7 @@ function goAction(){
 addEventListener('keydown',ev=>{const k=ev.key.toLowerCase();
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))ev.preventDefault();
   if(ev.repeat)return;keys.add(k);touchMode=false;initAudio();ensureMusic();updKeys();
+  if(G.moves){G.moves=false;SFX.ui();return}
   if(k==='m'){setMute(!muted);return}
   if(k==='c'&&(state==='title'||G.paused)){SFX.ui();setCtrl(CTRL+1);return}
   if(state!=='play'||G.paused){if(k==='enter'||K_ATK.includes(k)||(G.paused&&(k==='p'||k==='escape'))){SFX.ui();goAction()}else if(k==='escape'&&(state==='over'||state==='clear'))toTitle();return}
@@ -1460,13 +1531,27 @@ function drawCap(c){const x=c.x,y=c.y,S=STAGES[stageI];if(c.dead){g.fillStyle='r
   if(state==='play'&&!c.freed){if(c.k==='cage'||c.k==='amina')txt('アミナ',x,y-(c.k==='cage'?50:40),10,'#e8d8c8','center',JP,['#000',3],700);
     if(S.burn&&c.dieAt){const rem=clamp((c.dieAt-G.burn)/c.dieAt,0,1),hot=c.dieAt-G.burn<12;g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=4;g.beginPath();g.arc(x+12,y-34,6,0,TAU);g.stroke();
       g.strokeStyle=hot?(Math.floor(G.t*6)%2?'#ffffff':'#ffe14a'):'#e8ecff';g.lineWidth=2.4;g.beginPath();g.arc(x+12,y-34,6,-PI/2,-PI/2+TAU*rem);g.stroke()}}}
-function drawGoal(){const S=STAGES[stageI];if(!S.goal||state==='clear')return;const[x,y]=S.goal,ph=(G.t*.7)%1;g.save();
-  for(let k=0;k<2;k++){const q=(ph+k*.5)%1;g.strokeStyle=`rgba(210,225,255,${.5*(1-q)})`;g.lineWidth=1.6;g.beginPath();g.ellipse(x,y,16+q*30,7+q*13,0,0,TAU);g.stroke()}
-  g.globalAlpha=.55;drawFig(g,x,y-4,-PI/2,'ninja',{pose:'idle',noShadow:1,noWpn:1});g.globalAlpha=1;txt('松林へ',x,y-62,12,'#dfe6ff','center',JP,['#000',3],700);g.restore()}
+function drawGoal(){const S=STAGES[stageI];if(!S.goal||state==='clear')return;const[x,y]=S.goal,ph=(G.t*.7)%1,k=S.gk||'sword';g.save();
+  for(let i=0;i<2;i++){const q=(ph+i*.5)%1;g.strokeStyle=`rgba(255,226,150,${.4*(1-q)})`;g.lineWidth=1.5;g.beginPath();g.ellipse(x,y,16+q*30,7+q*13,0,0,TAU);g.stroke()}
+  if(k==='sword'){ /* 難破船から流れ着いた船板に、黒鞘の刀が引っかかっている */
+    g.fillStyle='rgba(0,0,0,.4)';ell(g,x+3,y+3,32,7);
+    g.save();g.translate(x,y);g.rotate(-.28);g.fillStyle='#4a3826';g.fillRect(-32,-5,64,10);g.fillStyle='#2e2218';g.fillRect(-32,-1,64,1.6);g.fillRect(14,-5,1.4,10);g.restore();
+    for(let i=0;i<3;i++){g.fillStyle='rgba(20,30,18,.7)';ell(g,x-20+i*17,y+5,6,1.6,i)} // 絡みついた海藻
+    g.save();g.translate(x-2,y-6);g.rotate(.42);g.fillStyle='#0b0b10';rrc(g,-26,-2.3,42,4.6,2);g.fill();g.fillStyle='#c9a24a';g.fillRect(16,-4.2,2.4,8.4);
+    g.fillStyle='#22202a';g.fillRect(18.4,-1.9,13,3.8);g.fillStyle='#d8d0c0';for(let i=0;i<4;i++)g.fillRect(19.6+i*3,-1.9,1,3.8);g.restore();
+    const tw=.5+.5*Math.sin(G.t*3);g.fillStyle=`rgba(255,250,235,${.3+.5*tw})`;ell(g,x+10,y+1,2+tw,.8);ell(g,x+10,y+1,.8,2+tw)}
+  else if(k==='child')drawCap({x,y,k:'',dieAt:0,freed:false,dead:false,t:0,sk:'#5a3a26'});
+  else if(k==='tally'){ /* 関所の番台に置かれた割符 */g.fillStyle='rgba(0,0,0,.4)';ell(g,x+3,y+2,18,5);g.fillStyle='#5a4430';g.fillRect(x-14,y-12,28,12);g.fillStyle='#7a5c3c';g.fillRect(x-15,y-14,30,3);
+    g.fillStyle='#d8c08a';g.fillRect(x-4,y-28,8,15);g.fillStyle='#3a2a1a';g.fillRect(x-1,y-25,2,9);g.fillStyle='#b81828';ell(g,x,y-16,2.2,2.2)}
+  else if(k==='ledger'){ /* 蔵の長持の上の帳簿 */g.fillStyle='rgba(0,0,0,.4)';ell(g,x+3,y+2,22,6);g.fillStyle='#2e2218';g.fillRect(x-18,y-16,36,16);g.fillStyle='#4a3826';g.fillRect(x-19,y-18,38,3);g.fillStyle='#c9a24a';g.fillRect(x-2,y-12,4,4);
+    g.fillStyle='#b8a888';g.fillRect(x-10,y-25,20,7);g.fillStyle='#2a2a4a';g.fillRect(x-10,y-25,3,7)}
+  if(hyp(P.x-x,P.y-y)<280)txt(S.gs,x,y-(k==='child'?60:40),12,'#ffe9a8','center',JP,['#000',3],700);g.restore()}
 function drawTide(){if(G.tideY<=TOP+62)return;const y=G.tideY,gr=g.createLinearGradient(0,TOP,0,y);gr.addColorStop(0,'rgba(8,16,30,.78)');gr.addColorStop(1,'rgba(20,40,64,.42)');g.fillStyle=gr;g.fillRect(0,TOP,W,y-TOP);
   g.strokeStyle='rgba(220,235,250,.55)';g.lineWidth=2;g.beginPath();for(let x=0;x<=W;x+=8){const v=y+Math.sin(x*.05+G.t*2)*3+Math.sin(x*.13+G.t*1.3)*1.5;if(x)g.lineTo(x,v);else g.moveTo(x,v)}g.stroke()}
 function drawCloud(){const K=G.cloudK;if(K<.02)return;for(let i=0;i<3;i++){const x=((G.t*18+i*210)%(W+400))-200,y=cam+TOP+120+i*230;g.fillStyle=`rgba(0,0,12,${.16*K})`;ell(g,x,y,190,70)}}
-function drawEnemy(e){drawFig(g,e.x,e.y,e.face,e.type,{melee:e.melee,st:e.state,mv:e.moving?e.walkPh:0,flash:e.hitFlash,alpha:e.fade,lean:e.state==='charge'?Math.cos(e.face)*.25:0})}
+function drawEnemy(e){const pn=e.state==='panic',jx=pn?Math.sin(G.t*47+e.walkPh)*1.6:e.fear?Math.sin(G.t*31+e.walkPh)*.5:0;
+  if(pn&&Math.floor(G.t*3+e.walkPh)%2===0){g.fillStyle='rgba(200,215,255,.85)';ell(g,e.x+9,e.y-46+((G.t*40)%8),1.6,2.4)} // 冷や汗
+  drawFig(g,e.x+jx,e.y,e.face,e.type,{melee:e.melee,st:e.state,mv:e.moving?e.walkPh:0,flash:e.hitFlash,alpha:e.fade,lean:e.state==='charge'?Math.cos(e.face)*.25:0})}
 function drawScarf(c,alpha){const s=P.scarf;if(!s.length)return;c.save();c.globalAlpha=alpha;c.lineCap='round';c.lineJoin='round';
   for(const off of [-1.6,1.6]){for(let i=1;i<s.length;i++){const k=1-i/s.length;c.strokeStyle=i<2?'#7a0a12':'#c1121f';c.lineWidth=1+3.4*k;c.beginPath();
     const a=Math.atan2(s[i][1]-s[i-1][1],s[i][0]-s[i-1][0])+PI/2,ox=Math.cos(a)*off*k,oy=Math.sin(a)*off*k;c.moveTo(s[i-1][0]+ox,s[i-1][1]+oy);c.lineTo(s[i][0]+ox,s[i][1]+oy);c.stroke()}}
@@ -1617,18 +1702,22 @@ function drawHUD(){const gr=g.createLinearGradient(0,0,0,TOP);gr.addColorStop(0,
   if(P.hidden||P.swim)txt(P.lit?'照らされ中':'血遁',gx+gw+10,gy+5,13,P.lit?'#ffb050':'#ff4a5a','left',JP,['#000',3],900);
   txt(KANJI[stageI]+'ノ段　'+STAGES[stageI].name,W/2,19,15,'#f0e6dc','center',JP,['#000',3],900);
   const S=STAGES[stageI];let rest=E.filter(e=>!e.dead).length;for(let w=G.wave+1;w<S.waves.length;w++)rest+=S.waves[w].length;
-  if(!S.boss)txt(S.pro?'見つからずに松林へ':rest===0&&capsLeft()?'鎖を断て':'残り '+rest,W/2+10,43,13,'#d8b8b8','center',JP,['#000',3]);
+  if(!S.boss||!G.gateOn)txt(S.goal?'目的：'+S.gs:S.gateY&&!G.gateOn?(S.boss?'桟橋の奥へ':'甲板へ'):S.final?'鎖を断ち、南条を討て':'残り '+rest,W/2+10,43,13,'#d8b8b8','center',JP,['#000',3]);
   if(S.final&&state==='play'&&G.fleeT>0&&E.some(o=>o.type==='nanjo'&&!o.dead))txt('南条　逃走まで '+Math.ceil(G.fleeT),W/2,TOP+(G.cloudK>.5?30:14),13,G.fleeT<15?'#ffe14a':'#e8ecff','center',JP,['#000',3],900);
   if(state==='play'&&WH>H)for(const c of G.caps){if(c.freed||c.dead||c.k==='cage')continue;const sy=c.y-cam;if(sy>TOP+24&&sy<H-10)continue; // 画面の外にいる鎖の人を、上下の縁に示す
     const up=sy<=TOP+24,yy=up?TOP+38:H-22,d=up?-1:1;g.fillStyle='#9fe8b0';g.beginPath();g.moveTo(c.x,yy+d*8);g.lineTo(c.x-6,yy-d*2);g.lineTo(c.x+6,yy-d*2);g.closePath();g.fill();
     if(S.burn&&c.dieAt)txt(String(Math.max(0,Math.ceil(c.dieAt-G.burn))),c.x+13,yy+4,11,c.dieAt-G.burn<12?'#ffe14a':'#e8ecff','left',GO,['#000',3],900)}
+  if(state==='play'&&S.goal){const sy=S.goal[1]-cam;if(sy<TOP+26){const yy=TOP+40,x=S.goal[0],rt=x>W-110;g.fillStyle='#ffe14a';g.beginPath();g.moveTo(x,yy-11);g.lineTo(x-8,yy+2);g.lineTo(x+8,yy+2);g.closePath();g.fill(); // 奥の目的への矢印
+    txt(S.gs+'　あと'+Math.max(0,Math.round((P.y-S.goal[1])/20))+'歩',x+(rt?-14:14),yy-2,11.5,'#ffe9a8',rt?'right':'left',JP,['#000',3],700)}}
   if(G.cloudK>.5&&!S.boss&&state==='play')txt('月隠れ　敵の視界が狭い',W/2,TOP+14,12,'#b8c8ff','center',JP,['#000',3],700);
   if(state==='play'||state==='intro'){muteIcon(372,31);
     g.fillStyle='#ddd';g.fillRect(414,21,4,20);g.fillRect(424,21,4,20);btn(402,13,40,40,pauseGame)}
   if(state==='play'&&!touchMode&&!S.pro){skillIcon(300,43,11,G.swimPick?'渡':'閃',P.dashCD,DASH_CD,G.swimPick?'#ff3050':'#75dcff',11);skillIcon(326,43,11,'裏',P.shuriCD,SHURI_CD,'#ff6685',11)}
-  const b=G.boss;if(b&&!b.dead&&state==='play'){const w=300,x=(W-w)/2,y=TOP+12;g.fillStyle='rgba(0,0,0,.6)';g.fillRect(x-2,y-2,w+4,12);g.fillStyle='#5a0a12';g.fillRect(x,y,w,8);g.fillStyle=b.p2?'#ff3040':'#d01a2a';g.fillRect(x,y,w*Math.max(0,b.hp)/b.maxhp,8);
+  const b=G.boss;if(b&&!b.dead&&state==='play'&&G.gateOn){const w=300,x=(W-w)/2,y=TOP+12;g.fillStyle='rgba(0,0,0,.6)';g.fillRect(x-2,y-2,w+4,12);g.fillStyle='#5a0a12';g.fillRect(x,y,w,8);g.fillStyle=b.p2?'#ff3040':'#d01a2a';g.fillRect(x,y,w*Math.max(0,b.hp)/b.maxhp,8);
     txt('龍造寺 玄蕃',W/2,y+22,12,'#f0d0d0','center',JP,['#000',3],900)}
-  if(G.chain>=2&&state==='play'){const pop=1+Math.max(0,G.chainT-2.8)*2;txt(G.chain+' 連斬',W-14,TOP+(b&&!b.dead?52:22),(17+Math.min(8,G.chain))*pop,G.chain>=8?'#ffd34a':G.chain>=4?'#ff6a7a':'#fff','right',JP,['#000',4],900)}}
+  if(state==='play'&&!S.pro){txt(G.score.toLocaleString(),W-12,TOP+15,13,'#e8ecff','right',GO,['#000',3],900);
+    if(G.bcT>0&&G.bc>=1){const y=TOP+(b&&!b.dead?44:32),k=G.bcT/3.2;txt('血鎖 ×'+G.bc,W-12,y,16+Math.min(8,G.bc*1.5),G.bc>=3?'#ff2040':'#ff6a7a','right',JP,['#000',4],900);g.fillStyle='rgba(0,0,0,.6)';g.fillRect(W-82,y+9,70,4);g.fillStyle='#ff2040';g.fillRect(W-82,y+9,70*k,4)}}
+  if(G.chain>=2&&state==='play'){const pop=1+Math.max(0,G.chainT-2.8)*2;txt(G.chain+' 連斬',W-14,TOP+(b&&!b.dead?52:22)+(G.bcT>0?44:20),(17+Math.min(8,G.chain))*pop,G.chain>=8?'#ffd34a':G.chain>=4?'#ff6a7a':'#fff','right',JP,['#000',4],900)}}
 // タッチ操作の目印：スティック・攻撃の波紋・ガードの輪・右下のボタン
 function drawTouchUI(){if(!touchMode||state!=='play'||G.paused)return;g.save();
   if(inp.stick!=null&&!CTRL){g.globalAlpha=.35;g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.arc(inp.sx,inp.sy,STICK_R,0,TAU);g.stroke();g.globalAlpha=.5;g.fillStyle='rgba(255,255,255,.7)';ell(g,inp.sx+inp.tx*STICK_R,inp.sy+inp.ty*STICK_R,12,12)}
@@ -1653,13 +1742,18 @@ function drawBig(){const b=G.big;if(!b)return;const a=Math.min(1,b.t*8,(b.dur-b.
   txt(b.s,W/2,250,40*pop,b.col,'center',JP,['#1a0004',7],900);g.globalAlpha=1}
 function drawIntro(){const t=G.introT,a=t<2.3?1:Math.max(0,1-(t-2.3)/.6);g.globalAlpha=a*.82;g.fillStyle='#050205';g.fillRect(0,0,W,H);g.globalAlpha=a;
   const S=STAGES[stageI];txt(KANJI[stageI],W/2,300,110,'rgba(180,10,30,.9)','center',JP,null,900);txt(KANJI[stageI]+'ノ段',W/2,395,18,'#e8d8d0','center',JP,null,700);
-  txt(S.name,W/2,435,34,'#fff','center',JP,['#000',5],900);g.globalAlpha=a*Math.min(1,Math.max(0,(t-.5)*2));txt('「'+S.line+'」',W/2,488,14,'#f0d6d6','center',JP,null,700);if(S.when)txt(S.when,W/2,522,12,'#b89a9a','center',JP,null,700);if(G.allies>0)txt('鎖を断った人々が力を貸す：陽動 ×'+G.allies,W/2,560,13,'#9fe8b0','center',JP,['#000',3],700);g.globalAlpha=1}
-function drawClear(){const t=G.clearT;if(t<2.2){const a=Math.min(1,t*3)*Math.min(1,(2.2-t)*3);g.globalAlpha=a;txt(STAGES[stageI].pro?'生':'斬',W/2,380,140,'rgba(255,255,255,.92)','center',JP,['#300',8],900);g.globalAlpha=1;return}
+  txt(S.name,W/2,435,34,'#fff','center',JP,['#000',5],900);g.globalAlpha=a*Math.min(1,Math.max(0,(t-.5)*2));txt('「'+S.line+'」',W/2,488,14,'#f0d6d6','center',JP,null,700);if(S.when)txt(S.when,W/2,522,12,'#b89a9a','center',JP,null,700);if(S.obj)txt('目的：'+S.obj,W/2,550,13.5,'#ffe9a8','center',JP,['#000',3],700);if(G.allies>0)txt('鎖を断った人々が力を貸す：陽動 ×'+G.allies,W/2,578,13,'#9fe8b0','center',JP,['#000',3],700);g.globalAlpha=1}
+function drawClear(){const t=G.clearT;if(t<2.2){const a=Math.min(1,t*3)*Math.min(1,(2.2-t)*3);g.globalAlpha=a;txt(STAGES[stageI].pro?'生':STAGES[stageI].goal?'忍':'斬',W/2,380,140,'rgba(255,255,255,.92)','center',JP,['#300',8],900);g.globalAlpha=1;return}
   const a=Math.min(1,(t-2.2)*3);g.globalAlpha=a*.78;g.fillStyle='#080206';g.fillRect(0,0,W,H);g.globalAlpha=a;
   txt(KANJI[stageI]+'ノ段　突破',W/2,180,30,'#fff','center',JP,['#000',5],900);
-  const m=Math.floor(G.time/60),s=Math.floor(G.time%60);const rows=[['時間',m+':'+String(s).padStart(2,'0')],['撃破',G.kills],['暗殺',G.assn],['最大連斬',G.maxChain],['血槍',G.spears],['防御',G.guards],['被弾',G.hits]];if(capN())rows.push(['解放',G.freedN+'／'+capN()]);if(STAGES[stageI].final)rows.push(['南条',G.njDead?'討った':'逃がした']);const rh=rows.length>8?26:rows.length>7?28:32;
+  const m=Math.floor(G.time/60),s=Math.floor(G.time%60);const rows=[['時間',m+':'+String(s).padStart(2,'0')],['斬った数',G.kills],['見つかった',G.spot],['血槍',G.spears],['最大血鎖',G.maxBc],['被弾',G.hits]];if(capN())rows.push(['解放',G.freedN+'／'+capN()]);if(STAGES[stageI].final)rows.push(['南条',G.njDead?'討った':'逃がした']);const rh=rows.length>8?26:rows.length>7?28:32;
   rows.forEach(([k,v],i)=>{txt(k,140,240+i*rh,17,'#d8c0c0','left',JP,null,700);txt(String(v),310,240+i*rh,20,'#fff','right',JP,null,900)});
-  txt('評価',W/2,486,16,'#d8c0c0','center',JP);txt(G.rank,W/2,545,72,G.rank==='S'?'#ff2a40':G.rank==='A'?'#ffcf4a':'#e0e0e0','center',JP,['#000',6],900);
+  txt('評価',W/2-90,486,16,'#d8c0c0','center',JP);txt(G.rank,W/2-90,545,72,G.rank==='S'?'#ff2a40':G.rank==='A'?'#ffcf4a':'#e0e0e0','center',JP,['#000',6],900);
+  /* 得点：ボーナスが一つずつ足されていく */
+  {const bs=G.bonus||[],u=Math.max(0,t-2.5),k=Math.min(bs.length,Math.floor(u/.45));let base=G.score;for(const [,v] of bs)base-=v;let sc=base;for(let i=0;i<k;i++)sc+=bs[i][1];
+    txt('得点',W/2+70,474,14,'#d8c0c0','center',JP);txt(sc.toLocaleString(),W/2+70,512,30,'#ffffff','center',GO,['#000',5],900);
+    for(let i=0;i<k;i++)txt(bs[i][0]+'　+'+bs[i][1].toLocaleString(),W/2+70,536+i*17,11.5,'#cfd8ff','center',JP,['#000',3],700);
+    if(k>=bs.length){if(G.scoreNew&&Math.floor(G.t*3)%2===0)txt('自己最高！',W/2+70,594,15,'#ffe14a','center',JP,['#000',4],900);else if(!G.scoreNew)txt('自己最高　'+(G.bestScore||0).toLocaleString(),W/2+70,594,11.5,'#a8a0b8','center',JP,null,700)}}
   if(t>2.8)txt(G.ending?'タップで先へ':stageI+1<STAGES.length?'タップで次の段へ':'タップでタイトルへ',W/2,640,15,`rgba(255,255,255,${.6+.4*Math.sin(G.t*4)})`,'center',JP,null,700);g.globalAlpha=1}
 function drawOver(){const a=Math.min(1,G.overT*2);g.globalAlpha=a*.8;g.fillStyle='#0a0004';g.fillRect(0,0,W,H);g.globalAlpha=a;
   txt('力尽きた',W/2,300,46,'#d0142a','center',JP,['#000',6],900);txt('血の海は、まだ乾いていない。',W/2,360,15,'#e8d0d0','center',JP);if(G.tip)txt('心得：'+G.tip,W/2,400,12,'#ffb0b8','center',JP,['#000',3],700);
@@ -1668,12 +1762,38 @@ const HELP_T=['左半分をドラッグ：移動','右半分をタップ：斬�
 const HELP_K=['WASD／矢印：移動','J／Z／Space／左クリック：斬る（連打で4連撃）','U／V／右クリック長押し：正面をガード','Shift：一閃（無敵の突進斬り）','I／K：手裏剣（敵を止める・音で気を引く）','L／E：奥義・影縫い　　P／Esc：一時停止','血の中で Shift：血渡り（血の上の敵を真下から串刺し）'];
 const HELP_FT=['画面をなぞる：移動（なぞる速さで動く）','タップ：斬る（連打で4連撃）　長押し：正面をガード','移動中に2本目の指でタップ：動きながら斬る','すばやくはじく／右下【一閃】：無敵の突進斬り','右下【手裏剣】：敵を止める・音で気を引く','光る忍をタップ：奥義・影縫い','血の中ではじく／【一閃】：血渡り'];
 const HELP_FK=['マウスを動かす：カーソルへ移動','左クリック：斬る（連打で4連撃）','右クリック長押し：正面をガード','右クリックを短く：一閃／血の中では血渡り','I／K：手裏剣　　L／E：奥義・影縫い','P／Esc：一時停止　　C：操作の切替','WASD・Shift などのキー操作も、そのまま使える'];
+/* 技表：技の名前・出し方・効き目。出し方は、いまの操作（従来／なぞり）とスマホ／PC で変わる */
+const MOVES=[['基本'],
+  ['斬る',['右半分をタップ','J／左クリック','タップ','左クリック'],'連打で4連撃。4撃目は周り全部を斬る回転斬り'],
+  ['暗殺',['気づかれていない敵を斬る'],'一撃で倒す（ボスとドゥアルテ以外）'],
+  ['ガード',['右半分を長押し','U／右クリック長押し','長押し','右クリック長押し'],'正面の攻撃を防ぐ。侍の斬撃を防ぐと隙ができる'],
+  ['一閃',['右下【一閃】','Shift','すばやくはじく','右クリックを短く'],'無敵の突進斬り。倒すとすぐ次が出せる'],
+  ['手裏剣',['右下【手裏剣】','I','右下【手裏剣】','I'],'敵を止める。壁に当てると音で誘える'],
+  ['血の技'],
+  ['血遁',['血だまりの上で止まる'],'敵から見えなくなり、体力が少しずつ戻る',1],
+  ['血渡り',['血遁中に【一閃】','血遁中に Shift','血遁中にはじく','血遁中に右クリック短く'],'つながった血の中を一瞬で移動する',1],
+  ['血槍',['血の上に立つ敵へ血渡り'],'真下から串刺し。倒すとその血に潜ったまま',1],
+  ['血鎖',['血槍のあと3秒以内に次の血槍'],'三連で周りの敵が総崩れ。五連で奥義ゲージ回復',1],
+  ['引きずり込み',['血遁から、血の上の敵を斬る'],'音も死体も残さず、敵を血の中へ',1],
+  ['血引き',['敵を倒した直後に歩く'],'歩いた跡が細い血の道になる（潜れないが渡れる）',1],
+  ['奥義（ゲージが満ちたら）'],
+  ['影縫い',['光る忍をタップ','L／E','光る忍をタップ','L／E'],'時を止め、近くの敵を最大5体斬る'],
+  ['血海',['血遁中に奥義'],'つながった血の上の敵を、まとめて串刺し',1]];
+function drawMoves(){g.globalAlpha=1;g.globalCompositeOperation='source-over';g.fillStyle='#07070f';g.fillRect(0,0,W,H);txt('技　表',W/2,52,26,'#fff','center',JP,['#000',4],900);
+  txt('操作：'+CTRL_N[CTRL]+'（'+(touchMode?'スマホ':'PC')+'）',W/2,80,11.5,'#a8b0c8','center',JP,null,700);
+  const ci=(CTRL?2:0)+(touchMode?0:1);let y=108;
+  for(const m of MOVES){if(m.length===1){g.fillStyle='rgba(255,255,255,.12)';g.fillRect(16,y-11,W-32,20);txt(m[0],24,y,12.5,'#ffe9a8','left',JP,null,900);y+=24;continue}
+    const inp=m[1].length>1?m[1][ci]:m[1][0];txt(m[0],24,y,15,m[3]?'#ff4a5a':'#ffffff','left',JP,['#000',3],900);txt(inp,W-20,y,12.5,'#ffe9a8','right',JP,['#000',3],700);
+    txt(m[2],24,y+17,11.5,'#c8ccdc','left',JP,null,700);y+=39}
+  txt('タップ／どのキーでも閉じる',W/2,H-16,12,`rgba(255,255,255,${.55+.35*Math.sin(G.t*4)})`,'center',JP,null,700);
+  BTNS.push({x:0,y:0,w:W,h:H,fn:()=>{G.moves=false}})}
 function drawPause(){g.fillStyle='rgba(5,2,6,.86)';g.fillRect(0,0,W,H);txt('一時停止',W/2,170,34,'#fff','center',JP,['#000',5],900);
   button('再開',125,220,200,54,()=>{G.paused=false});button('この段をやり直す',105,292,240,46,()=>startStage(stageI),{bg:'rgba(40,30,40,.9)',size:16});button('タイトルへ',125,352,200,44,toTitle,{bg:'rgba(40,30,40,.9)',size:16});
-  button('操作：'+CTRL_N[CTRL]+'　（切替）',95,410,260,36,()=>setCtrl(CTRL+1),{bg:'rgba(40,30,40,.9)',size:14});const HL=CTRL?(touchMode?HELP_FT.map(noFlick):HELP_FK):(touchMode?HELP_T:HELP_K);HL.forEach((l,i)=>txt(l,W/2,466+i*22,13,'#d6d0d4','center',JP,null,700));const py=466+HL.length*22+6;
+  button('操作：'+CTRL_N[CTRL]+'（切替）',30,410,230,36,()=>setCtrl(CTRL+1),{bg:'rgba(40,30,40,.9)',size:13});button('技表',272,410,148,36,()=>{G.moves=true},{size:16});const HL=CTRL?(touchMode?HELP_FT.map(noFlick):HELP_FK):(touchMode?HELP_T:HELP_K);HL.forEach((l,i)=>txt(l,W/2,466+i*22,13,'#d6d0d4','center',JP,null,700));const py=466+HL.length*22+6;
   txt('血だまりの中は【血遁】 敵から見えず、体力も戻る',W/2,py,12,'#ff9aa5','center',JP,null,700);txt('気づかれる前・血遁から出てすぐの攻撃は【暗殺】',W/2,py+20,12,'#ff9aa5','center',JP,null,700);txt('提灯・篝火の明かりの中では、血遁でも見つかる',W/2,py+40,12,'#ffc080','center',JP,null,700);
+  txt('目的は奥へ抜けること。見つからず、斬らずに進むほど高得点',W/2,py+80,12,'#ffe9a8','center',JP,null,700);
   txt(CTRL===1?'なぞり：すばやく動くと足音で気づかれる':CTRL===2?'なぞり・無制限（試験）：速さに上限も足音もない':'斬った後に歩くと血の道【血引き】／血の中で奥義は【血海】',W/2,py+60,12,CTRL?'#b8c8ff':'#ff9aa5','center',JP,null,700);
-  muteIcon(W/2,720)}
+  muteIcon(W/2,742)}
 function drawEnding(){const t=G.endT;
   const R=G.capRes||{n:0,freed:0,amina:true,nj:true},all=R.freed>=R.n; // 解放できた人数で、結末の文が変わる
   const L=[[.5,R.nj?'南条は血の海に沈み、船長ドゥアルテは炎に消えた。':'南条は小舟で沖へ逃げ、船長ドゥアルテは炎に消えた。'],[2.9,all?'鎖を断たれた人々の小舟が、沖へ出ていく。':R.freed?'小舟に乗れたのは、'+R.freed+'人だけだった。':'小舟は、一艘も出なかった。'],
@@ -1715,24 +1835,25 @@ function drawTitle(){const t=G.titleT;
   for(let i=0;i<STAGES.length;i++){const x=W/2-(STAGES.length*58-8)/2+i*58,ok=i<unl;button(KANJI[i],x,676,50,38,()=>startStage(i),{dim:!ok,size:18,bg:'rgba(40,10,20,.9)'});if(best[i])txt(best[i],x+44,677,12,'#ffcf4a','center',GO,['#000',3],900)}
   const L=touchMode?['左半分ドラッグ：移動　／　右半分タップ：斬る・長押し：ガード','右下ボタン：一閃・手裏剣　／　光る忍をタップ：奥義']:['WASD：移動　J／左クリック：斬る　U／右クリック：ガード','Shift：一閃　I：手裏剣　L／E：奥義　P：一時停止'];
   L.forEach((l,i)=>txt(l,W/2,736+i*18,11.5,'#c9bcc0','center',JP,['#000',3],700));
-  txt(VERSION+'　試作版　'+VDATE,W-10,789,10,'#866','right',GO);muteIcon(W-26,26)}
+  txt(VERSION+'　試作版　'+VDATE,W-10,789,10,'#866','right',GO);muteIcon(W-26,26);button('技表',12,10,74,32,()=>{G.moves=true},{size:15})}
 function draw(){BTNS=[];g.setTransform(SC*DPR,0,0,SC*DPR,0,0);g.fillStyle='#050307';g.fillRect(0,0,W,H);
-  if(state==='title'){drawTitle();return}
+  if(state==='title'){drawTitle();if(G.moves)drawMoves();return}
   if(state==='story'){drawStory();return}
   g.save();if(G.shake>0)g.translate((Math.random()*2-1)*G.shake*.6,(Math.random()*2-1)*G.shake*.6);g.translate(0,-Math.round(cam*2)/2);drawWorld();g.restore();
   const vg=g.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');g.fillStyle=vg;g.fillRect(0,0,W,H);
+  if(state==='play'&&G.bcT>0&&G.bc>=2){const k=Math.min(1,G.bc/5)*(G.bcT/3.2);const vr=g.createRadialGradient(W/2,H/2,H*.32,W/2,H/2,H*.7);vr.addColorStop(0,'rgba(120,0,16,0)');vr.addColorStop(1,`rgba(150,0,22,${.32*k})`);g.fillStyle=vr;g.fillRect(0,0,W,H)} // 血鎖の間、画面の縁が赤く脈打つ
   if(state==='play'&&!P.dead&&P.hp<=1){g.fillStyle=`rgba(160,0,20,${.1+.06*Math.sin(G.t*6)})`;g.fillRect(0,0,W,H)} // 瀕死：画面が赤く脈打つ
   if(G.ts<.8&&state==='play'&&!P.dead){g.fillStyle=`rgba(90,0,20,${(.8-G.ts)*.18})`;g.fillRect(0,0,W,H)}
   if(G.flash>0){g.globalAlpha=Math.min(.6,G.flash);g.fillStyle=G.flashC;g.fillRect(0,0,W,H);g.globalAlpha=1}
   if(state==='ending'){drawEnding();return}
   drawPaper();drawHUD();if(state==='play'){drawTouchUI();drawHint();drawBanner();drawBig();drawCutIn()}
-  if(state==='intro')drawIntro();if(state==='clear')drawClear();if(state==='over')drawOver();if(G.paused)drawPause()}
+  if(state==='intro')drawIntro();if(state==='clear')drawClear();if(state==='over')drawOver();if(G.paused)drawPause();if(G.moves)drawMoves()}
 
 let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const rdt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{pollPad();update(rdt);draw()}catch(err){ERRN++;console.error(err)}}
 window.__SOB={get state(){return state},set state(v){state=v},G,P,inp,get E(){return E},get POOLS(){return POOLS},get BTNS(){return BTNS},get ARR(){return ARR},get SH(){return SH},get ERRN(){return ERRN},
   get touchMode(){return touchMode},set touchMode(v){touchMode=v},TOUCH,UIB,
-  startStage,update,draw,pressAttack,useDash,throwShuriken,useOugi,beginPlay,uiTap,STAGES,canSee,stageClear,toTitle,hurt,nextFromClear,blocked,los,checkTouchHold,mkEnemy,goAction,addPool,litBy,startStory,freeCap,lightKeg,explode,footBlood,kill,hint,setCtrl,get CTRL(){return CTRL},noiseAt,get cam(){return cam},set cam(v){cam=v},get WH(){return WH},toHunt};
+  startStage,update,draw,pressAttack,useDash,throwShuriken,useOugi,beginPlay,uiTap,STAGES,canSee,stageClear,toTitle,hurt,nextFromClear,blocked,los,checkTouchHold,mkEnemy,goAction,addPool,litBy,startStory,freeCap,lightKeg,explode,footBlood,kill,hint,setCtrl,get CTRL(){return CTRL},noiseAt,panic,bloodChain,MOVES,alarm,get cam(){return cam},set cam(v){cam=v},get WH(){return WH},toHunt};
 requestAnimationFrame(loop);
 })();
 </script>
